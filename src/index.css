@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MicroQuest Design System - Cozy Adventure Theme */
+
+@layer base {
+  :root {
+    /* Warm cream background */
+    --background: 40 33% 97%;
+    --foreground: 25 30% 15%;
+
+    /* Card surfaces */
+    --card: 40 30% 99%;
+    --card-foreground: 25 30% 15%;
+
+    --popover: 40 30% 99%;
+    --popover-foreground: 25 30% 15%;
+
+    /* Warm amber primary */
+    --primary: 36 90% 50%;
+    --primary-foreground: 40 33% 99%;
+
+    /* Soft sage secondary */
+    --secondary: 145 20% 92%;
+    --secondary-foreground: 145 25% 25%;
+
+    /* Muted warm gray */
+    --muted: 35 15% 92%;
+    --muted-foreground: 25 15% 45%;
+
+    /* Accent - warm coral */
+    --accent: 15 85% 60%;
+    --accent-foreground: 40 33% 99%;
+
+    /* Success green */
+    --success: 145 55% 45%;
+    --success-foreground: 40 33% 99%;
+
+    /* Destructive */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 40 33% 99%;
+
+    --border: 35 25% 88%;
+    --input: 35 25% 88%;
+    --ring: 36 90% 50%;
+
+    --radius: 0.75rem;
+
+    /* Quest-specific colors */
+    --quest-glow: 36 100% 70%;
+    --today-highlight: 36 90% 95%;
+    --history-muted: 25 20% 94%;
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(25 30% 15% / 0.08);
+    --shadow-medium: 0 4px 16px -4px hsl(25 30% 15% / 0.12);
+    --shadow-glow: 0 0 20px -5px hsl(36 90% 50% / 0.3);
+
+    --sidebar-background: 40 30% 98%;
+    --sidebar-foreground: 25 30% 15%;
+    --sidebar-primary: 36 90% 50%;
+    --sidebar-primary-foreground: 40 33% 99%;
+    --sidebar-accent: 35 15% 92%;
+    --sidebar-accent-foreground: 25 30% 15%;
+    --sidebar-border: 35 25% 88%;
+    --sidebar-ring: 36 90% 50%;
+  }
+
+  .dark {
+    --background: 25 25% 10%;
+    --foreground: 40 25% 92%;
+
+    --card: 25 20% 14%;
+    --card-foreground: 40 25% 92%;
+
+    --popover: 25 20% 14%;
+    --popover-foreground: 40 25% 92%;
+
+    --primary: 36 85% 55%;
+    --primary-foreground: 25 25% 10%;
+
+    --secondary: 145 15% 20%;
+    --secondary-foreground: 145 20% 85%;
+
+    --muted: 25 15% 20%;
+    --muted-foreground: 35 15% 60%;
+
+    --accent: 15 75% 55%;
+    --accent-foreground: 25 25% 10%;
+
+    --success: 145 50% 40%;
+    --success-foreground: 40 33% 99%;
+
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 40 33% 99%;
+
+    --border: 25 15% 22%;
+    --input: 25 15% 22%;
+    --ring: 36 85% 55%;
+
+    --quest-glow: 36 100% 60%;
+    --today-highlight: 36 50% 18%;
+    --history-muted: 25 15% 16%;
+
+    --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 20px -5px hsl(36 85% 55% / 0.4);
+
+    --sidebar-background: 25 20% 12%;
+    --sidebar-foreground: 40 25% 92%;
+    --sidebar-primary: 36 85% 55%;
+    --sidebar-primary-foreground: 25 25% 10%;
+    --sidebar-accent: 25 15% 18%;
+    --sidebar-accent-foreground: 40 25% 92%;
+    --sidebar-border: 25 15% 22%;
+    --sidebar-ring: 36 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .quest-card {
+    @apply bg-card rounded-xl p-4 shadow-soft border border-border/50 transition-all duration-200;
+  }
+  
+  .quest-card:hover {
+    @apply shadow-medium -translate-y-0.5;
+  }
+  
+  .today-card {
+    @apply bg-gradient-to-br from-card to-[hsl(var(--today-highlight))] rounded-2xl p-6 shadow-medium border border-primary/20;
+  }
+  
+  .btn-quest {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-medium transition-all duration-200;
+  }
+  
+  .page-header {
+    @apply text-2xl md:text-3xl font-bold tracking-tight;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
