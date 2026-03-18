@@ -6,12 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Sun, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
 export default function TodayPage() {
   const { todayQuest, completeToday } = useQuests();
+  const {
+    isActive: isTutorialActive,
+    tutorialQuestId,
+  } = useTutorial();
   const [reflection, setReflection] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
+  const isTutorialQuestToday = Boolean(tutorialQuestId && todayQuest?.id === tutorialQuestId);
+  const shouldRequireReflection = isTutorialActive && isTutorialQuestToday;
 
   const handleComplete = () => {
     setIsCompleting(true);
@@ -40,7 +47,7 @@ export default function TodayPage() {
           title="No quest selected for today"
           description="Pick a quest from your collection to focus on today. One step at a time!"
           actionLabel="Choose a Quest"
-          actionTo="/"
+          actionTo="/quests"
         />
       </div>
     );
@@ -54,7 +61,10 @@ export default function TodayPage() {
       </div>
 
       {/* Today's Quest Card */}
-      <div className={`today-card animate-fade-in ${isCompleting ? 'opacity-50 scale-98' : ''}`}>
+      <div
+        className={`today-card animate-fade-in ${isCompleting ? 'opacity-50 scale-98' : ''}`}
+        data-tutorial-id={isTutorialQuestToday ? 'today-quest-card' : undefined}
+      >
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary shadow-glow">
             <Sparkles className="h-6 w-6 text-primary-foreground" />
@@ -81,13 +91,15 @@ export default function TodayPage() {
               placeholder="How did it go? What did you learn or feel?"
               rows={3}
               className="bg-background/50"
+              data-tutorial-id={isTutorialQuestToday ? 'reflection-input' : undefined}
             />
           </div>
 
           <Button 
             onClick={handleComplete} 
-            disabled={isCompleting}
+            disabled={isCompleting || (shouldRequireReflection && !reflection.trim())}
             className="w-full btn-quest h-12 text-base"
+            data-tutorial-id={isTutorialQuestToday ? 'complete-quest-button' : undefined}
           >
             <CheckCircle2 className="mr-2 h-5 w-5" />
             Complete Quest
@@ -98,7 +110,7 @@ export default function TodayPage() {
       {/* Link to pick another */}
       <div className="mt-6 text-center">
         <Link 
-          to="/" 
+          to="/quests"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Want to change today's quest?

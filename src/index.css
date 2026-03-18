@@ -191,4 +191,23 @@
       transform: scale(1);
     }
   }
+
+  .tutorial-active .quest-card,
+  .tutorial-active .today-card,
+  .tutorial-active .animate-fade-in,
+  .tutorial-active .animate-scale-in,
+  .tutorial-active [data-tutorial-id],
+  .tutorial-active [data-tutorial-id] * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .tutorial-active .animate-fade-in,
+  .tutorial-active .animate-scale-in {
+    transform: none !important;
+  }
+
+  .tutorial-active .quest-card:hover {
+    transform: none !important;
+  }
 }

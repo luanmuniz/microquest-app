@@ -1,7 +1,9 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { useQuestStore } from '@/hooks/useQuestStore';
 
-const QuestContext = createContext(null);
+type QuestContextValue = ReturnType<typeof useQuestStore>;
+
+const QuestContext = createContext<QuestContextValue | null>(null);
 
 export function QuestProvider({ children }: { children: ReactNode }) {
   const store = useQuestStore();
