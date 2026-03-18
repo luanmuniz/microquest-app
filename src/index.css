@@ -124,7 +124,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -151,7 +151,7 @@
   }
   
   .today-card {
-    @apply bg-gradient-to-br from-card to-[hsl(var(--today-highlight))] rounded-2xl p-6 shadow-medium border border-primary/20;
+    @apply bg-gradient-to-br from-card to-[hsl(var(--today-highlight))] rounded-2xl p-4 lg:p-6 shadow-medium border border-primary/20;
   }
   
   .btn-quest {
@@ -159,7 +159,7 @@
   }
   
   .page-header {
-    @apply text-2xl md:text-3xl font-bold tracking-tight;
+    @apply text-2xl lg:text-3xl font-bold tracking-tight;
   }
   
   .animate-fade-in {

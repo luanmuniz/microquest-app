@@ -70,9 +70,9 @@ export default function QuestsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="page-header">Your Quests</h1>
           <p className="text-muted-foreground mt-1">
@@ -83,7 +83,7 @@ export default function QuestsPage() {
         {quests.length > 0 && (
           <Button
             onClick={() => setShowForm(true)}
-            className="btn-quest"
+            className="btn-quest w-full lg:w-auto"
             data-tutorial-id={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -137,11 +137,13 @@ export default function QuestsPage() {
       {/* Create Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent
+          className="gap-5"
           data-tutorial-id={
             currentStepId === 'create-quest-modal' ? 'create-quest-modal' : undefined
           }
         >
-          <DialogHeader>
+          <div className="mx-auto h-1.5 w-12 rounded-full bg-border/80 lg:hidden" />
+          <DialogHeader className="pr-8">
             <DialogTitle>Create New Quest</DialogTitle>
             <DialogDescription>
               Add a new challenge to your quest collection.
@@ -156,8 +158,9 @@ export default function QuestsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingQuest} onOpenChange={() => setEditingQuest(null)}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="gap-5">
+          <div className="mx-auto h-1.5 w-12 rounded-full bg-border/80 lg:hidden" />
+          <DialogHeader className="pr-8">
             <DialogTitle>Edit Quest</DialogTitle>
             <DialogDescription>
               Update your quest details.

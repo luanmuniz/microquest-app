@@ -25,10 +25,10 @@ export function QuestCard({
         isToday ? 'ring-2 ring-primary/50 bg-today-highlight' : ''
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-foreground truncate">{quest.title}</h3>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 pr-1">
+            <h3 className="break-words font-semibold text-foreground">{quest.title}</h3>
             {isToday && (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                 <Check className="h-3 w-3" />
@@ -48,17 +48,18 @@ export function QuestCard({
           )}
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex shrink-0 items-center gap-1 rounded-lg bg-muted/70 p-1 lg:rounded-none lg:bg-transparent lg:p-0">
           {!isToday && onSetToday && (
             <Button
               variant="ghost"
               size="icon"
               onClick={onSetToday}
-              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="h-9 w-9 text-muted-foreground hover:bg-primary/10 hover:text-primary lg:h-8 lg:w-auto lg:px-2.5"
               title="Set as Today's Quest"
               data-tutorial-id={setTodayTutorialTarget ? 'set-today-quest' : undefined}
             >
               <Sun className="h-4 w-4" />
+              <span className="hidden lg:inline">Set today</span>
             </Button>
           )}
           {onEdit && (
@@ -66,10 +67,11 @@ export function QuestCard({
               variant="ghost"
               size="icon"
               onClick={onEdit}
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              className="h-9 w-9 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground lg:h-8 lg:w-auto lg:px-2.5"
               title="Edit Quest"
             >
               <Pencil className="h-4 w-4" />
+              <span className="hidden lg:inline">Edit</span>
             </Button>
           )}
           {onDelete && (
@@ -77,10 +79,11 @@ export function QuestCard({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-9 w-9 text-muted-foreground hover:bg-destructive/15 hover:text-destructive lg:h-8 lg:w-auto lg:px-2.5"
               title="Delete Quest"
             >
               <Trash2 className="h-4 w-4" />
+              <span className="hidden lg:inline">Delete</span>
             </Button>
           )}
         </div>

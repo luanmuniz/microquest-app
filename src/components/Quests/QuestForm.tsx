@@ -39,7 +39,7 @@ export function QuestForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="title">Quest Title *</Label>
         <Input
@@ -68,13 +68,18 @@ export function QuestForm({
         />
       </div>
 
-      <div className="flex gap-2">
-        <Button type="submit" className="btn-quest">
+      <div className="flex flex-col gap-2 pt-1 lg:flex-row">
+        <Button type="submit" className="btn-quest w-full lg:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           {submitLabel}
         </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="w-full lg:w-auto"
+          >
             <X className="mr-2 h-4 w-4" />
             Cancel
           </Button>

@@ -59,27 +59,27 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-in space-y-12">
-      <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-today-highlight p-8 shadow-medium md:p-12">
+    <div className="mx-auto max-w-5xl animate-fade-in space-y-10 lg:space-y-12">
+      <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-today-highlight p-5 shadow-medium sm:p-6 lg:p-12">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
         <div className="relative max-w-2xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:text-sm">
             <Sparkles className="h-4 w-4" />
             Welcome to MicroQuest
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-5xl">
             Small quests, clear daily momentum.
           </h1>
-          <p className="mt-4 text-base text-muted-foreground md:text-lg">
+          <p className="mt-4 text-sm text-muted-foreground sm:text-base lg:text-lg">
             MicroQuest helps you turn intentions into action with one focused
             daily quest. Build your quest list, choose your daily focus, and
             keep a history of completed wins.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3">
+          <div className="mt-6 flex flex-col gap-3 lg:mt-8">
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="btn-quest h-11 px-6 text-base">
+              <Button asChild className="btn-quest h-11 w-full px-6 text-base sm:w-auto">
                 <Link to="/quests" onClick={markWelcomeSeen}>
                   Start Using MicroQuest
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -88,7 +88,7 @@ export default function WelcomePage() {
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="h-11 px-6 text-base">
+                  <Button variant="outline" className="h-11 w-full px-6 text-base sm:w-auto">
                     I already know the app
                   </Button>
                 </AlertDialogTrigger>
@@ -125,7 +125,7 @@ export default function WelcomePage() {
           A simple loop designed to make progress feel manageable and consistent.
         </p>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
           {steps.map(({ title, description, icon: Icon }) => (
             <div
               key={title}
@@ -141,7 +141,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-soft">
+      <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-soft lg:p-6">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <History className="h-4 w-4" />

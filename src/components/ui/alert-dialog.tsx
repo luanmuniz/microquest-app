@@ -16,7 +16,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-[70] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
@@ -34,7 +34,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-[80] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 lg:data-[state=closed]:slide-out-to-left-1/2 lg:data-[state=closed]:slide-out-to-top-[48%] lg:data-[state=open]:slide-in-from-left-1/2 lg:data-[state=open]:slide-in-from-top-[48%] max-lg:inset-x-0 max-lg:left-0 max-lg:top-auto max-lg:bottom-0 max-lg:max-h-[85svh] max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0 max-lg:overflow-y-auto max-lg:rounded-b-none max-lg:rounded-t-3xl max-lg:border-border/70 max-lg:bg-card max-lg:p-5 max-lg:pb-[calc(env(safe-area-inset-bottom)+1rem)] max-lg:before:mx-auto max-lg:before:mb-3 max-lg:before:block max-lg:before:h-1.5 max-lg:before:w-12 max-lg:before:rounded-full max-lg:before:bg-border/80 max-lg:before:content-[''] max-lg:data-[state=closed]:slide-out-to-bottom max-lg:data-[state=open]:slide-in-from-bottom",
         className,
       )}
       {...props}
@@ -44,12 +44,12 @@ const AlertDialogContent = React.forwardRef<
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 
 const AlertDialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 text-left", className)} {...props} />
 );
 AlertDialogHeader.displayName = "AlertDialogHeader";
 
 const AlertDialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
+  <div className={cn("flex flex-col gap-2 lg:flex-row lg:justify-end lg:space-x-2 lg:gap-0", className)} {...props} />
 );
 AlertDialogFooter.displayName = "AlertDialogFooter";
 
@@ -73,7 +73,11 @@ const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants(), className)} {...props} />
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants(), "w-full lg:w-auto", className)}
+    {...props}
+  />
 ));
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
@@ -83,7 +87,7 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className)}
+    className={cn(buttonVariants({ variant: "outline" }), "w-full lg:w-auto", className)}
     {...props}
   />
 ));

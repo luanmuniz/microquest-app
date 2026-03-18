@@ -9,8 +9,8 @@ export default function HistoryPage() {
   const { tutorialCompletionId } = useTutorial();
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
+    <div className="mx-auto max-w-2xl">
+      <div className="mb-6 lg:mb-8">
         <h1 className="page-header">Quest History</h1>
         <p className="text-muted-foreground mt-1">
           {completions.length} completed quest{completions.length !== 1 ? 's' : ''}

@@ -36,8 +36,8 @@ export default function TodayPage() {
 
   if (!todayQuest) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-6 lg:mb-8">
           <h1 className="page-header">Today's Quest</h1>
           <p className="text-muted-foreground mt-1">Your daily focus</p>
         </div>
@@ -54,8 +54,8 @@ export default function TodayPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
+    <div className="mx-auto max-w-2xl">
+      <div className="mb-6 lg:mb-8">
         <h1 className="page-header">Today's Quest</h1>
         <p className="text-muted-foreground mt-1">Focus on this challenge today</p>
       </div>
@@ -65,13 +65,13 @@ export default function TodayPage() {
         className={`today-card animate-fade-in ${isCompleting ? 'opacity-50 scale-98' : ''}`}
         data-tutorial-id={isTutorialQuestToday ? 'today-quest-card' : undefined}
       >
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary shadow-glow">
-            <Sparkles className="h-6 w-6 text-primary-foreground" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary shadow-glow lg:h-12 lg:w-12">
+            <Sparkles className="h-5 w-5 text-primary-foreground lg:h-6 lg:w-6" />
           </div>
           
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">{todayQuest.title}</h2>
+            <h2 className="text-lg font-bold text-foreground lg:text-xl">{todayQuest.title}</h2>
             {todayQuest.description && (
               <p className="mt-2 text-muted-foreground">{todayQuest.description}</p>
             )}
@@ -79,7 +79,7 @@ export default function TodayPage() {
         </div>
 
         {/* Reflection + Complete */}
-        <div className="mt-8 space-y-4">
+        <div className="mt-6 space-y-4 lg:mt-8">
           <div className="space-y-2">
             <Label htmlFor="reflection" className="text-foreground">
               Reflection (optional)
@@ -98,7 +98,7 @@ export default function TodayPage() {
           <Button 
             onClick={handleComplete} 
             disabled={isCompleting || (shouldRequireReflection && !reflection.trim())}
-            className="w-full btn-quest h-12 text-base"
+            className="btn-quest h-12 w-full text-base"
             data-tutorial-id={isTutorialQuestToday ? 'complete-quest-button' : undefined}
           >
             <CheckCircle2 className="mr-2 h-5 w-5" />

@@ -1,4 +1,5 @@
 import {
+  CSSProperties,
   ReactNode,
   createContext,
   useCallback,
@@ -16,6 +17,7 @@ import {
   hasSeenWelcome,
   markTutorialSeen,
 } from '@/lib/onboarding';
+import { useIsMobile } from '@/hooks/useMobile';
 import { toast } from 'sonner';
 
 type TutorialStepId =
@@ -119,6 +121,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const { quests, todayQuestId, completions, startFresh } = useQuests();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [isActive, setIsActive] = useState(() => shouldRunTutorial());
   const [stepIndex, setStepIndex] = useState(0);
   const [tutorialQuestId, setTutorialQuestId] = useState<string | null>(null);
@@ -283,6 +286,8 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const targetPosition = window.getComputedStyle(targetElement).position;
+      const isFixedTarget = targetPosition === 'fixed';
       let targetElementRect = targetElement.getBoundingClientRect();
       const isOffscreen =
         targetElementRect.bottom < 0 ||
@@ -290,13 +295,47 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
         targetElementRect.right < 0 ||
         targetElementRect.left > window.innerWidth;
 
-      if (isOffscreen) {
+      if (isOffscreen && !isFixedTarget) {
         targetElement.scrollIntoView({
           block: 'center',
           inline: 'nearest',
           behavior: 'auto',
         });
         targetElementRect = targetElement.getBoundingClientRect();
+      }
+
+      if (
+        isMobile &&
+        !isFixedTarget &&
+        targetElementRect.bottom > window.innerHeight - 260
+      ) {
+        targetElement.scrollIntoView({
+          block: 'center',
+          inline: 'nearest',
+          behavior: 'auto',
+        });
+        targetElementRect = targetElement.getBoundingClientRect();
+      }
+
+      if (
+        isMobile &&
+        (currentStep.id === 'open-today' || currentStep.id === 'open-history')
+      ) {
+        const insetX = Math.min(16, targetElementRect.width * 0.18);
+        const insetTop = 4;
+        const insetBottom = 6;
+        const adjustedWidth = Math.max(44, targetElementRect.width - insetX * 2);
+        const adjustedHeight = Math.max(
+          36,
+          targetElementRect.height - insetTop - insetBottom,
+        );
+
+        targetElementRect = new DOMRect(
+          targetElementRect.left + insetX,
+          targetElementRect.top + insetTop,
+          adjustedWidth,
+          adjustedHeight,
+        );
       }
 
       setTargetRect(targetElementRect);
@@ -330,7 +369,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       }
       observer.disconnect();
     };
-  }, [currentStep, isActive, location.pathname]);
+  }, [currentStep, isActive, isMobile, location.pathname]);
 
   useEffect(() => {
     if (
@@ -338,6 +377,13 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       !currentStep?.targetSelector ||
       !currentStep.advanceOnTargetClick
     ) {
+      return;
+    }
+
+    // For navigation steps, only advance when route actually changes.
+    // This prevents progressing the tutorial on touchstart/pointerdown
+    // without the page transition completing.
+    if (currentStep.id === 'open-today' || currentStep.id === 'open-history') {
       return;
     }
 
@@ -353,12 +399,12 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       advanceStep(currentStep.id);
     };
 
-    targetElement.addEventListener('pointerdown', handleTargetClick, {
+    targetElement.addEventListener('click', handleTargetClick, {
       once: true,
     });
 
     return () => {
-      targetElement.removeEventListener('pointerdown', handleTargetClick);
+      targetElement.removeEventListener('click', handleTargetClick);
     };
   }, [advanceStep, currentStep, isActive, location.pathname, targetRect]);
 
@@ -375,13 +421,38 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     };
   }, [isActive]);
 
-  const cardStyle = useMemo(() => {
+  const cardStyle = useMemo<CSSProperties>(() => {
+    if (isMobile) {
+      const isLargeTarget = Boolean(
+        targetRect && targetRect.height > window.innerHeight * 0.45,
+      );
+      const shouldDockTop = Boolean(
+        targetRect &&
+          (targetRect.top > window.innerHeight * 0.55 || isLargeTarget),
+      );
+
+      return {
+        left: 12,
+        right: 12,
+        top: shouldDockTop
+          ? 'calc(env(safe-area-inset-top) + 12px)'
+          : 'auto',
+        bottom: shouldDockTop
+          ? 'auto'
+          : 'calc(env(safe-area-inset-bottom) + 12px)',
+        width: 'auto',
+        maxHeight: '46svh',
+        overflowY: 'auto',
+      };
+    }
+
     if (!targetRect) {
       return {
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
         width: 360,
+        maxWidth: 'calc(100vw - 2rem)',
       };
     }
 
@@ -402,8 +473,56 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       left,
       top,
       width: cardWidth,
+      maxWidth: 'calc(100vw - 2rem)',
     };
-  }, [targetRect]);
+  }, [isMobile, targetRect]);
+
+  const highlightStyle = useMemo<CSSProperties | null>(() => {
+    if (!targetRect) {
+      return null;
+    }
+
+    const isBottomNavStep =
+      isMobile &&
+      (currentStep?.id === 'open-today' || currentStep?.id === 'open-history');
+    const isCreateQuestModalStep =
+      isMobile && currentStep?.id === 'create-quest-modal';
+
+    if (isCreateQuestModalStep) {
+      const top = Math.max(0, targetRect.top - 2);
+
+      return {
+        top,
+        left: 0,
+        width: window.innerWidth,
+        height: Math.max(0, window.innerHeight - top),
+        borderRadius: '1.5rem 1.5rem 0 0',
+      };
+    }
+
+    const viewportMargin = isBottomNavStep ? 4 : 8;
+    const outlinePadding = isBottomNavStep ? 3 : 6;
+    const maxWidth = Math.max(0, window.innerWidth - viewportMargin * 2);
+    const maxHeight = Math.max(0, window.innerHeight - viewportMargin * 2);
+    const width = Math.min(targetRect.width + outlinePadding * 2, maxWidth);
+    const height = Math.min(targetRect.height + outlinePadding * 2, maxHeight);
+    const left = Math.min(
+      Math.max(viewportMargin, targetRect.left - outlinePadding),
+      window.innerWidth - width - viewportMargin,
+    );
+    const top = Math.min(
+      Math.max(viewportMargin, targetRect.top - outlinePadding),
+      window.innerHeight - height - viewportMargin,
+    );
+
+    return {
+      top,
+      left,
+      width,
+      height,
+      borderRadius: isBottomNavStep ? 18 : 12,
+    };
+  }, [currentStep?.id, isMobile, targetRect]);
 
   const shouldHighlightTarget = Boolean(
     currentStep?.targetSelector &&
@@ -472,12 +591,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
             <div className="pointer-events-none fixed inset-0 z-[80]">
               <div
                 className="absolute rounded-xl border-2 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] transition-all duration-200"
-                style={{
-                  top: Math.max(8, targetRect.top - 6),
-                  left: Math.max(8, targetRect.left - 6),
-                  width: targetRect.width + 12,
-                  height: targetRect.height + 12,
-                }}
+                style={highlightStyle ?? undefined}
               />
             </div>
           ) : (
@@ -485,7 +599,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
           )}
 
           <div
-            className="fixed z-[90] rounded-2xl border border-border/80 bg-card p-5 shadow-medium pointer-events-auto"
+            className="fixed z-[90] rounded-2xl border border-border/80 bg-card p-4 shadow-medium pointer-events-auto lg:p-5"
             style={cardStyle}
           >
             <div className="text-xs font-medium uppercase tracking-wide text-primary">
@@ -503,7 +617,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
                 <h4 className="mt-4 text-sm font-medium text-foreground">
                   Before skipping, do you want to clean tutorial quest data?
                 </h4>
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:justify-end">
                   <Button variant="ghost" onClick={() => setShowSkipCleanupPrompt(false)}>
                     Continue tutorial
                   </Button>
@@ -516,7 +630,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
                 </div>
               </div>
             ) : currentStep.id === 'cleanup-prompt' ? (
-              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <div className="mt-5 flex flex-col gap-2 lg:flex-row lg:justify-end">
                 <Button variant="outline" onClick={handleKeepTutorialData}>
                   Keep tutorial data
                 </Button>

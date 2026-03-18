@@ -32,7 +32,7 @@ export function EmptyState({
       {actionLabel && (actionTo || onAction) && (
         <div className="mt-6">
           {actionTo ? (
-            <Button asChild className="btn-quest">
+            <Button asChild className="btn-quest w-full lg:w-auto">
               <Link to={actionTo} data-tutorial-id={actionDataTutorialId}>
                 {actionLabel}
               </Link>
@@ -40,7 +40,7 @@ export function EmptyState({
           ) : (
             <Button
               onClick={onAction}
-              className="btn-quest"
+              className="btn-quest w-full lg:w-auto"
               data-tutorial-id={actionDataTutorialId}
             >
               {actionLabel}

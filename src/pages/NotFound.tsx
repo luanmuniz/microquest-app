@@ -12,10 +12,10 @@ const NotFound = () => {
 
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
-      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-6">
-        <Compass className="h-10 w-10" />
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground lg:h-20 lg:w-20">
+        <Compass className="h-8 w-8 lg:h-10 lg:w-10" />
       </div>
-      <h1 className="text-4xl font-bold text-foreground">404</h1>
+      <h1 className="text-3xl font-bold text-foreground lg:text-4xl">404</h1>
       <p className="mt-2 text-lg text-muted-foreground">
         Oops! This quest doesn't exist.
       </p>
