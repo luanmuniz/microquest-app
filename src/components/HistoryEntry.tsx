@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ChevronDown, ChevronUp, MessageSquare, Calendar } from 'lucide-react';
+import type { QuestCompletion } from '@/hooks/useQuestStore';
 
 interface HistoryEntryProps {
-  completion: any;
+  completion: QuestCompletion;
+  tutorialTarget?: boolean;
 }
 
-export function HistoryEntry({ completion }: HistoryEntryProps) {
+export function HistoryEntry({ completion, tutorialTarget = false }: HistoryEntryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const formattedDate = format(new Date(completion.completedAt), 'MMM d, yyyy');
   const formattedTime = format(new Date(completion.completedAt), 'h:mm a');
@@ -15,6 +17,7 @@ export function HistoryEntry({ completion }: HistoryEntryProps) {
     <div 
       className="quest-card cursor-pointer animate-fade-in"
       onClick={() => setIsExpanded(!isExpanded)}
+      data-tutorial-id={tutorialTarget ? 'history-entry' : undefined}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">

@@ -20,7 +20,7 @@ const NotFound = () => {
         Oops! This quest doesn't exist.
       </p>
       <Button asChild className="mt-6 btn-quest">
-        <Link to="/">Return to Quests</Link>
+        <Link to="/quests">Return to Quests</Link>
       </Button>
     </div>
   );

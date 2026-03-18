@@ -9,6 +9,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   actionTo?: string;
   onAction?: () => void;
+  actionDataTutorialId?: string;
 }
 
 export function EmptyState({ 
@@ -17,7 +18,8 @@ export function EmptyState({
   description, 
   actionLabel, 
   actionTo, 
-  onAction 
+  onAction,
+  actionDataTutorialId,
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
@@ -31,10 +33,16 @@ export function EmptyState({
         <div className="mt-6">
           {actionTo ? (
             <Button asChild className="btn-quest">
-              <Link to={actionTo}>{actionLabel}</Link>
+              <Link to={actionTo} data-tutorial-id={actionDataTutorialId}>
+                {actionLabel}
+              </Link>
             </Button>
           ) : (
-            <Button onClick={onAction} className="btn-quest">
+            <Button
+              onClick={onAction}
+              className="btn-quest"
+              data-tutorial-id={actionDataTutorialId}
+            >
               {actionLabel}
             </Button>
           )}

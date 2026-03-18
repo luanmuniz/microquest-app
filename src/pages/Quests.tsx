@@ -4,6 +4,7 @@ import { QuestCard } from '@/components/Quests/QuestCard';
 import { QuestForm } from '@/components/Quests/QuestForm';
 import { EmptyState } from '@/components/Quests/EmptyState';
 import { Button } from '@/components/ui/button';
+import type { Quest } from '@/hooks/useQuestStore';
 import { 
   Dialog, 
   DialogContent, 
@@ -21,14 +22,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Scroll } from 'lucide-react';
+import { Info, Plus, Scroll } from 'lucide-react';
+import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
 export default function QuestsPage() {
   const { quests, todayQuestId, addQuest, updateQuest, deleteQuest, setTodayQuest } = useQuests();
+  const { currentStepId, tutorialQuestId } = useTutorial();
   const [showForm, setShowForm] = useState(false);
-  const [editingQuest, setEditingQuest] = useState(null);
+  const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [deletingQuestId, setDeletingQuestId] = useState<string | null>(null);
+  const hasSampleQuests = quests.some((quest) => quest.isSample);
 
   const handleCreate = (title: string, description: string) => {
     addQuest(title, description);
@@ -77,7 +81,11 @@ export default function QuestsPage() {
         </div>
         
         {quests.length > 0 && (
-          <Button onClick={() => setShowForm(true)} className="btn-quest">
+          <Button
+            onClick={() => setShowForm(true)}
+            className="btn-quest"
+            data-tutorial-id={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Quest
           </Button>
@@ -92,25 +100,47 @@ export default function QuestsPage() {
           description="Create your first quest to start your journey. Small daily challenges lead to big changes!"
           actionLabel="Create Your First Quest"
           onAction={() => setShowForm(true)}
+          actionDataTutorialId={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
         />
       ) : (
-        <div className="space-y-3">
-          {quests.map(quest => (
-            <QuestCard
-              key={quest.id}
-              quest={quest}
-              isToday={quest.id === todayQuestId}
-              onSetToday={() => handleSetToday(quest.id)}
-              onEdit={() => setEditingQuest(quest)}
-              onDelete={() => setDeletingQuestId(quest.id)}
-            />
-          ))}
-        </div>
+        <>
+          {hasSampleQuests && (
+            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p>
+                  Starter suggestions are included to help you begin. You can edit
+                  or delete any of them and add your own quests anytime.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {quests.map(quest => (
+              <QuestCard
+                key={quest.id}
+                quest={quest}
+                isToday={quest.id === todayQuestId}
+                onSetToday={() => handleSetToday(quest.id)}
+                onEdit={() => setEditingQuest(quest)}
+                onDelete={() => setDeletingQuestId(quest.id)}
+                setTodayTutorialTarget={
+                  currentStepId === 'set-today' && tutorialQuestId === quest.id
+                }
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Create Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent>
+        <DialogContent
+          data-tutorial-id={
+            currentStepId === 'create-quest-modal' ? 'create-quest-modal' : undefined
+          }
+        >
           <DialogHeader>
             <DialogTitle>Create New Quest</DialogTitle>
             <DialogDescription>

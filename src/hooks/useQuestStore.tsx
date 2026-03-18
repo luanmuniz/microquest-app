@@ -2,41 +2,153 @@ import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'microquest-data';
 
-const getInitialState = (): any => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      // Invalid JSON, return default
-    }
-  }
-  
-  // Return empty state with sample quests for first-time users
+export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  isSample?: boolean;
+}
+
+export interface QuestCompletion {
+  id: string;
+  questId: string;
+  questTitle: string;
+  completedAt: string;
+  reflection: string;
+}
+
+interface QuestState {
+  quests: Quest[];
+  todayQuestId: string | null;
+  completions: QuestCompletion[];
+}
+
+const EMPTY_STATE: QuestState = {
+  quests: [],
+  todayQuestId: null,
+  completions: [],
+};
+
+const STARTER_QUESTS = [
+  {
+    title: 'Take a 10-minute walk',
+    description:
+      'Step outside and enjoy some fresh air. Notice three things you see along the way.',
+  },
+  {
+    title: 'Write in a journal',
+    description:
+      'Spend 5 minutes writing about your day or anything on your mind.',
+  },
+  {
+    title: 'Drink a full glass of water',
+    description: 'Hydration quest! Fill up a glass and drink it mindfully.',
+  },
+];
+
+const createDefaultState = (): QuestState => {
+  const createdAt = new Date().toISOString();
+
   return {
-    quests: [
-      {
-        id: crypto.randomUUID(),
-        title: 'Take a 10-minute walk',
-        description: 'Step outside and enjoy some fresh air. Notice three things you see along the way.',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: crypto.randomUUID(),
-        title: 'Write in a journal',
-        description: 'Spend 5 minutes writing about your day or anything on your mind.',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: crypto.randomUUID(),
-        title: 'Drink a full glass of water',
-        description: 'Hydration quest! Fill up a glass and drink it mindfully.',
-        createdAt: new Date().toISOString(),
-      },
-    ],
+    quests: STARTER_QUESTS.map((quest) => ({
+      id: crypto.randomUUID(),
+      title: quest.title,
+      description: quest.description,
+      createdAt,
+      isSample: true,
+    })),
     todayQuestId: null,
     completions: [],
   };
+};
+
+const normalizeQuest = (value: unknown): Quest | null => {
+  if (!value || typeof value !== 'object') return null;
+
+  const quest = value as Partial<Record<string, unknown>>;
+  const title = typeof quest.title === 'string' ? quest.title.trim() : '';
+  if (!title) return null;
+
+  return {
+    id: typeof quest.id === 'string' && quest.id ? quest.id : crypto.randomUUID(),
+    title,
+    description: typeof quest.description === 'string' ? quest.description : '',
+    createdAt:
+      typeof quest.createdAt === 'string' && quest.createdAt
+        ? quest.createdAt
+        : new Date().toISOString(),
+    isSample: Boolean(quest.isSample),
+  };
+};
+
+const normalizeCompletion = (value: unknown): QuestCompletion | null => {
+  if (!value || typeof value !== 'object') return null;
+
+  const completion = value as Partial<Record<string, unknown>>;
+
+  return {
+    id: typeof completion.id === 'string' && completion.id ? completion.id : crypto.randomUUID(),
+    questId: typeof completion.questId === 'string' ? completion.questId : '',
+    questTitle:
+      typeof completion.questTitle === 'string' && completion.questTitle.trim()
+        ? completion.questTitle.trim()
+        : 'Completed quest',
+    completedAt:
+      typeof completion.completedAt === 'string' && completion.completedAt
+        ? completion.completedAt
+        : new Date().toISOString(),
+    reflection: typeof completion.reflection === 'string' ? completion.reflection : '',
+  };
+};
+
+const normalizeStoredState = (value: unknown): QuestState | null => {
+  if (!value || typeof value !== 'object') return null;
+
+  const stored = value as {
+    quests?: unknown;
+    completions?: unknown;
+    todayQuestId?: unknown;
+  };
+
+  const quests = Array.isArray(stored.quests)
+    ? stored.quests
+        .map(normalizeQuest)
+        .filter((quest): quest is Quest => quest !== null)
+    : [];
+
+  const completions = Array.isArray(stored.completions)
+    ? stored.completions
+        .map(normalizeCompletion)
+        .filter((completion): completion is QuestCompletion => completion !== null)
+    : [];
+
+  const todayQuestId =
+    typeof stored.todayQuestId === 'string' &&
+    quests.some((quest) => quest.id === stored.todayQuestId)
+      ? stored.todayQuestId
+      : null;
+
+  return {
+    quests,
+    todayQuestId,
+    completions,
+  };
+};
+
+const getInitialState = (): QuestState => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return createDefaultState();
+
+    const parsed = JSON.parse(stored);
+    const normalized = normalizeStoredState(parsed);
+
+    return normalized ?? createDefaultState();
+  } catch {
+    // Invalid JSON or restricted storage environment.
+    return createDefaultState();
+  }
 };
 
 export function useQuestStore() {
@@ -44,18 +156,23 @@ export function useQuestStore() {
 
   // Persist to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // Ignore storage errors (private mode, restricted environments, etc.)
+    }
   }, [state]);
 
   // Quest operations
   const addQuest = useCallback((title: string, description: string) => {
-    const newQuest: any = {
+    const newQuest: Quest = {
       id: crypto.randomUUID(),
       title,
       description,
       createdAt: new Date().toISOString(),
+      isSample: false,
     };
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       quests: [...prev.quests, newQuest],
     }));
@@ -63,18 +180,18 @@ export function useQuestStore() {
   }, []);
 
   const updateQuest = useCallback((id: string, title: string, description: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      quests: prev.quests.map(q => 
-        q.id === id ? { ...q, title, description } : q
+      quests: prev.quests.map((q) =>
+        q.id === id ? { ...q, title, description, isSample: false } : q
       ),
     }));
   }, []);
 
   const deleteQuest = useCallback((id: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      quests: prev.quests.filter(q => q.id !== id),
+      quests: prev.quests.filter((q) => q.id !== id),
       // Clear today if this quest was selected
       todayQuestId: prev.todayQuestId === id ? null : prev.todayQuestId,
     }));
@@ -82,15 +199,15 @@ export function useQuestStore() {
 
   // Today operations
   const setTodayQuest = useCallback((questId: string | null) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       todayQuestId: questId,
     }));
   }, []);
 
-  const getTodayQuest = useCallback((): any | null => {
+  const getTodayQuest = useCallback((): Quest | null => {
     if (!state.todayQuestId) return null;
-    return state.quests.find(q => q.id === state.todayQuestId) || null;
+    return state.quests.find((q) => q.id === state.todayQuestId) || null;
   }, [state.quests, state.todayQuestId]);
 
   // Completion operations
@@ -98,7 +215,7 @@ export function useQuestStore() {
     const todayQuest = getTodayQuest();
     if (!todayQuest) return;
 
-    const completion: any = {
+    const completion: QuestCompletion = {
       id: crypto.randomUUID(),
       questId: todayQuest.id,
       questTitle: todayQuest.title,
@@ -106,12 +223,16 @@ export function useQuestStore() {
       reflection,
     };
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       completions: [completion, ...prev.completions],
       todayQuestId: null, // Reset today after completion
     }));
   }, [getTodayQuest]);
+
+  const startFresh = useCallback(() => {
+    setState(EMPTY_STATE);
+  }, []);
 
   return {
     quests: state.quests,
@@ -123,5 +244,6 @@ export function useQuestStore() {
     deleteQuest,
     setTodayQuest,
     completeToday,
+    startFresh,
   };
 }

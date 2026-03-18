@@ -1,15 +1,24 @@
 import { Button } from '@/components/ui/button';
+import type { Quest } from '@/hooks/useQuestStore';
 import { Sun, Pencil, Trash2, Check } from 'lucide-react';
 
 interface QuestCardProps {
-  quest: any;
+  quest: Quest;
   isToday?: boolean;
   onSetToday?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  setTodayTutorialTarget?: boolean;
 }
 
-export function QuestCard({ quest, isToday, onSetToday, onEdit, onDelete }: QuestCardProps) {
+export function QuestCard({
+  quest,
+  isToday,
+  onSetToday,
+  onEdit,
+  onDelete,
+  setTodayTutorialTarget,
+}: QuestCardProps) {
   return (
     <div 
       className={`quest-card animate-fade-in ${
@@ -24,6 +33,11 @@ export function QuestCard({ quest, isToday, onSetToday, onEdit, onDelete }: Ques
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                 <Check className="h-3 w-3" />
                 Today
+              </span>
+            )}
+            {quest.isSample && (
+              <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                Starter
               </span>
             )}
           </div>
@@ -42,6 +56,7 @@ export function QuestCard({ quest, isToday, onSetToday, onEdit, onDelete }: Ques
               onClick={onSetToday}
               className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
               title="Set as Today's Quest"
+              data-tutorial-id={setTodayTutorialTarget ? 'set-today-quest' : undefined}
             >
               <Sun className="h-4 w-4" />
             </Button>

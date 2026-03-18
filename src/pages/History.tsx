@@ -2,9 +2,11 @@ import { useQuests } from '@/context';
 import { HistoryEntry } from '@/components/HistoryEntry';
 import { EmptyState } from '@/components/Quests/EmptyState';
 import { History } from 'lucide-react';
+import { useTutorial } from '@/tutorial/TutorialProvider';
 
 export default function HistoryPage() {
   const { completions } = useQuests();
+  const { tutorialCompletionId } = useTutorial();
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -26,7 +28,11 @@ export default function HistoryPage() {
       ) : (
         <div className="space-y-3">
           {completions.map(completion => (
-            <HistoryEntry key={completion.id} completion={completion} />
+            <HistoryEntry
+              key={completion.id}
+              completion={completion}
+              tutorialTarget={completion.id === tutorialCompletionId}
+            />
           ))}
         </div>
       )}
