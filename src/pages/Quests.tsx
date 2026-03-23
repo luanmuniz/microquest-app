@@ -16,6 +16,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -37,7 +38,7 @@ export default function QuestsPage() {
   const handleCreate = (title: string, description: string) => {
     addQuest(title, description);
     setShowForm(false);
-    toast.success('Quest created!', {
+    toast.success('Quest created', {
       description: `"${title}" has been added to your quest list.`
     });
   };
@@ -46,7 +47,7 @@ export default function QuestsPage() {
     if (editingQuest) {
       updateQuest(editingQuest.id, title, description);
       setEditingQuest(null);
-      toast.success('Quest updated!');
+      toast.success('Quest updated');
     }
   };
 
@@ -64,7 +65,7 @@ export default function QuestsPage() {
   const handleSetToday = (questId: string) => {
     const quest = quests.find(q => q.id === questId);
     setTodayQuest(questId);
-    toast.success("Today's quest set!", {
+    toast.success("Today's quest set", {
       description: quest ? `"${quest.title}" is now your focus.` : undefined
     });
   };
@@ -97,7 +98,7 @@ export default function QuestsPage() {
         <EmptyState
           icon={<Scroll className="h-8 w-8" />}
           title="No quests yet"
-          description="Create your first quest to start your journey. Small daily challenges lead to big changes!"
+          description="Create your first quest to start your journey. Small daily challenges lead to big changes."
           actionLabel="Create Your First Quest"
           onAction={() => setShowForm(true)}
           actionDataTutorialId={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
@@ -181,7 +182,8 @@ export default function QuestsPage() {
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingQuestId} onOpenChange={() => setDeletingQuestId(null)}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogClose aria-label="Close delete quest dialog" />
+          <AlertDialogHeader className="pr-8">
             <AlertDialogTitle>Delete this quest?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. The quest will be permanently removed from your collection.

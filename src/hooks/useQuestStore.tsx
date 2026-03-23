@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createQuestDataSnapshot, type QuestDataSnapshot } from '@/lib/dataTransfer';
 
 const STORAGE_KEY = 'microquest-data';
 
@@ -234,6 +235,10 @@ export function useQuestStore() {
     setState(EMPTY_STATE);
   }, []);
 
+  const replaceAllData = useCallback((snapshot: QuestDataSnapshot) => {
+    setState(createQuestDataSnapshot(snapshot));
+  }, []);
+
   return {
     quests: state.quests,
     todayQuestId: state.todayQuestId,
@@ -245,5 +250,6 @@ export function useQuestStore() {
     setTodayQuest,
     completeToday,
     startFresh,
+    replaceAllData,
   };
 }

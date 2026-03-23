@@ -28,7 +28,7 @@ export default function TodayPage() {
       completeToday(reflection);
       setReflection('');
       setIsCompleting(false);
-      toast.success('Quest completed! 🎉', {
+      toast.success('Quest completed 🎉', {
         description: 'Your achievement has been recorded in history.'
       });
     }, 300);
@@ -45,7 +45,7 @@ export default function TodayPage() {
         <EmptyState
           icon={<Sun className="h-8 w-8" />}
           title="No quest selected for today"
-          description="Pick a quest from your collection to focus on today. One step at a time!"
+          description="Pick a quest from your collection to focus on today. One step at a time"
           actionLabel="Choose a Quest"
           actionTo="/quests"
         />

@@ -11,6 +11,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -69,7 +70,7 @@ export default function WelcomePage() {
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-5xl">
-            Small quests, clear daily momentum.
+            Small quests, Daily momentum.
           </h1>
           <p className="mt-4 text-sm text-muted-foreground sm:text-base lg:text-lg">
             MicroQuest helps you turn intentions into action with one focused
@@ -93,7 +94,8 @@ export default function WelcomePage() {
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                  <AlertDialogHeader>
+                  <AlertDialogClose aria-label="Close start fresh dialog" />
+                  <AlertDialogHeader className="pr-8">
                     <AlertDialogTitle>Start fresh without demo data?</AlertDialogTitle>
                     <AlertDialogDescription>
                       This will clear your current quests, today selection, and history so
@@ -138,21 +140,6 @@ export default function WelcomePage() {
               <p className="mt-2 text-sm text-muted-foreground">{description}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-soft lg:p-6">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <History className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-foreground">Starter suggestions included</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              New users begin with a few sample quests to make onboarding easier.
-              You can edit or delete them anytime and add your own.
-            </p>
-          </div>
         </div>
       </section>
     </div>

@@ -21,7 +21,7 @@ export default function HistoryPage() {
         <EmptyState
           icon={<History className="h-8 w-8" />}
           title="No completed quests yet"
-          description="Complete your first quest to see your journey here. Every step counts!"
+          description="Complete your first quest to see your journey here. Every step counts."
           actionLabel="View Today's Quest"
           actionTo="/today"
         />

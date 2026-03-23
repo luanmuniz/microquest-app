@@ -1,6 +1,8 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { X } from "lucide-react";
 
+import { closeIconButtonClassName } from "@/components/ui/close-button";
 import { cn } from "@/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -93,6 +95,25 @@ const AlertDialogCancel = React.forwardRef<
 ));
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
+const AlertDialogClose = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, children, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={cn("absolute right-4 top-4", closeIconButtonClassName, className)}
+    {...props}
+  >
+    {children ?? (
+      <>
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </>
+    )}
+  </AlertDialogPrimitive.Cancel>
+));
+AlertDialogClose.displayName = "AlertDialogClose";
+
 export {
   AlertDialog,
   AlertDialogPortal,
@@ -105,4 +126,5 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogClose,
 };

@@ -11,12 +11,14 @@ import {
   Sparkles,
   Sun,
   Trash2,
+  Upload,
   X,
 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -24,8 +26,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { closeIconButtonClassName } from '@/components/ui/close-button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ImportDataDialog } from '@/components/ImportDataDialog';
 import { useQuests } from '@/context';
 import { useIsMobile } from '@/hooks/useMobile';
+import { stringifyQuestDataExport } from '@/lib/dataTransfer';
 import { clearOnboardingState } from '@/lib/onboarding';
 import { toast } from 'sonner';
 
@@ -40,8 +53,11 @@ export function Navbar() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isCleanDataDialogOpen, setIsCleanDataDialogOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const hasExportableData = quests.length > 0 || completions.length > 0 || todayQuestId !== null;
 
   useEffect(() => {
     if (isMobile) return;
@@ -81,13 +97,16 @@ export function Navbar() {
   }, [isMobile, isUserMenuOpen]);
 
   const handleExportData = () => {
+    if (!hasExportableData) {
+      return;
+    }
+
     try {
-      const appState = {
+      const json = stringifyQuestDataExport({
         quests,
         todayQuestId,
         completions,
-      };
-      const json = JSON.stringify(appState, null, 2);
+      });
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -99,6 +118,7 @@ export function Navbar() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
+      setIsExportDialogOpen(false);
       setIsUserMenuOpen(false);
 
       toast.success('Data exported', {
@@ -109,6 +129,16 @@ export function Navbar() {
         description: 'We could not generate your export file. Please try again.',
       });
     }
+  };
+
+  const handleOpenImportDialog = () => {
+    setIsUserMenuOpen(false);
+    setIsImportDialogOpen(true);
+  };
+
+  const handleOpenExportDialog = () => {
+    setIsUserMenuOpen(false);
+    setIsExportDialogOpen(true);
   };
 
   const handleStartFresh = () => {
@@ -213,7 +243,16 @@ export function Navbar() {
                     <button
                       type="button"
                       role="menuitem"
-                      onClick={handleExportData}
+                      onClick={handleOpenImportDialog}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Import data
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleOpenExportDialog}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                     >
                       <Download className="h-4 w-4" />
@@ -286,7 +325,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className={closeIconButtonClassName}
                     onClick={() => setIsUserMenuOpen(false)}
                   >
                     <X className="h-4 w-4" />
@@ -306,7 +345,16 @@ export function Navbar() {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={handleExportData}
+                    onClick={handleOpenImportDialog}
+                    className={menuActionClassName}
+                  >
+                    <Upload className="h-4 w-4" />
+                    Import data
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleOpenExportDialog}
                     className={menuActionClassName}
                   >
                     <Download className="h-4 w-4" />
@@ -331,12 +379,49 @@ export function Navbar() {
         </>
       )}
 
+      <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {hasExportableData ? 'Export your data?' : 'No data to export yet'}
+            </DialogTitle>
+            <DialogDescription>
+              {hasExportableData
+                ? 'Export downloads a JSON backup of your current MicroQuest data to this device. It includes your quests, today&apos;s selected quest, and completion history.'
+                : 'There is no data to export yet. Once MicroQuest has quests, today&apos;s selected quest, or completion history, you can download them as a JSON backup from here.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsExportDialogOpen(false)}
+            >
+              {hasExportableData ? 'Cancel' : 'Close'}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleExportData}
+              disabled={!hasExportableData}
+            >
+              Export data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ImportDataDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+      />
+
       <AlertDialog
         open={isCleanDataDialogOpen}
         onOpenChange={setIsCleanDataDialogOpen}
       >
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogClose aria-label="Close clean data dialog" />
+          <AlertDialogHeader className="pr-8">
             <AlertDialogTitle>Clean all app data?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently remove your quests, today&apos;s selection,

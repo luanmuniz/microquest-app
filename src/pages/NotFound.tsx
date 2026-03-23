@@ -17,7 +17,7 @@ const NotFound = () => {
       </div>
       <h1 className="text-3xl font-bold text-foreground lg:text-4xl">404</h1>
       <p className="mt-2 text-lg text-muted-foreground">
-        Oops! This quest doesn't exist.
+        Oops, This quest doesn't exist.
       </p>
       <Button asChild className="mt-6 btn-quest">
         <Link to="/quests">Return to Quests</Link>
