@@ -286,13 +286,6 @@ export function Navbar() {
                   key={to}
                   to={to}
                   onClick={() => setIsUserMenuOpen(false)}
-                  data-tutorial-id={
-                    to === '/today'
-                      ? 'nav-today'
-                      : to === '/history'
-                        ? 'nav-history'
-                        : undefined
-                  }
                   className={({ isActive }) =>
 		    `mx-1 flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 text-xs font-medium transition-colors ${
                       isActive

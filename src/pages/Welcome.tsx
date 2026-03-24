@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useQuests } from '@/context';
+import { useIsMobile } from '@/hooks/useMobile';
 import {
   clearTutorialSeen,
   markTutorialSeen,
@@ -54,9 +55,17 @@ export default function WelcomePage() {
   const { startFresh } = useQuests();
   const { restartTutorial } = useTutorial();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleStartTutorial = () => {
     markWelcomeSeen();
+
+    if (isMobile) {
+      markTutorialSeen();
+      navigate('/quests');
+      return;
+    }
+
     clearTutorialSeen();
     restartTutorial();
     navigate('/quests');
@@ -76,7 +85,7 @@ export default function WelcomePage() {
     markWelcomeSeen();
     markTutorialSeen();
     navigate('/quests');
-  }
+  };
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-in space-y-10 lg:space-y-12">

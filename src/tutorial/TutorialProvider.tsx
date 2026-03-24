@@ -125,8 +125,8 @@ const defaultContextValue: TutorialContextValue = {
 
 const TutorialContext = createContext<TutorialContextValue>(defaultContextValue);
 
-function shouldRunTutorial() {
-  return hasSeenWelcome() && !hasSeenTutorial();
+function shouldRunTutorial(isMobile: boolean) {
+  return !isMobile && hasSeenWelcome() && !hasSeenTutorial();
 }
 
 export function TutorialProvider({ children }: { children: ReactNode }) {
@@ -134,7 +134,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [isActive, setIsActive] = useState(() => shouldRunTutorial());
+  const [isActive, setIsActive] = useState(() => shouldRunTutorial(isMobile));
   const [stepIndex, setStepIndex] = useState(0);
   const [tutorialQuestId, setTutorialQuestId] = useState<string | null>(null);
   const [tutorialCompletionId, setTutorialCompletionId] = useState<string | null>(null);
@@ -143,17 +143,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const [isSkipDialogOpen, setIsSkipDialogOpen] = useState(false);
   const initialQuestIdsRef = useRef<Set<string>>(new Set());
   const currentStep = tutorialSteps[stepIndex];
-
-  const restartTutorial = useCallback(() => {
-    setIsActive(true);
-    setStepIndex(0);
-    setTutorialQuestId(null);
-    setTutorialCompletionId(null);
-    setTargetRect(null);
-    setTargetStepId(null);
-    setIsSkipDialogOpen(false);
-    initialQuestIdsRef.current = new Set(quests.map((quest) => quest.id));
-  }, [quests]);
+  const isTutorialActive = !isMobile && isActive;
 
   const resetTutorialState = useCallback(() => {
     setIsActive(false);
@@ -165,6 +155,23 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     setIsSkipDialogOpen(false);
     initialQuestIdsRef.current = new Set();
   }, []);
+
+  const restartTutorial = useCallback(() => {
+    if (isMobile) {
+      markTutorialSeen();
+      resetTutorialState();
+      return;
+    }
+
+    setIsActive(true);
+    setStepIndex(0);
+    setTutorialQuestId(null);
+    setTutorialCompletionId(null);
+    setTargetRect(null);
+    setTargetStepId(null);
+    setIsSkipDialogOpen(false);
+    initialQuestIdsRef.current = new Set(quests.map((quest) => quest.id));
+  }, [isMobile, quests, resetTutorialState]);
 
   const finishTutorial = useCallback(() => {
     markTutorialSeen();
@@ -182,14 +189,31 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isActive && shouldRunTutorial() && location.pathname !== '/welcome') {
+    if (!isMobile) {
+      return;
+    }
+
+    if (!hasSeenTutorial()) {
+      markTutorialSeen();
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    resetTutorialState();
+  }, [isMobile, resetTutorialState]);
+
+  useEffect(() => {
+    if (
+      !isTutorialActive &&
+      shouldRunTutorial(isMobile) &&
+      location.pathname !== '/welcome'
+    ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       restartTutorial();
     }
-  }, [isActive, location.pathname, restartTutorial]);
+  }, [isMobile, isTutorialActive, location.pathname, restartTutorial]);
 
   useEffect(() => {
-    if (!isActive || !currentStep) {
+    if (!isTutorialActive || !currentStep) {
       return;
     }
 
@@ -248,7 +272,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     advanceStep,
     completions,
     currentStep,
-    isActive,
+    isTutorialActive,
     location.pathname,
     quests,
     tutorialQuestId,
@@ -256,7 +280,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   ]);
 
   useEffect(() => {
-    if (!isActive || !currentStep?.targetSelector) {
+    if (!isTutorialActive || !currentStep?.targetSelector) {
       return;
     }
 
@@ -385,11 +409,11 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       }
       observer.disconnect();
     };
-  }, [currentStep, isActive, isMobile, location.pathname]);
+  }, [currentStep, isTutorialActive, isMobile, location.pathname]);
 
   useEffect(() => {
     if (
-      !isActive ||
+      !isTutorialActive ||
       !currentStep?.targetSelector ||
       !currentStep.advanceOnTargetClick
     ) {
@@ -422,10 +446,10 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     return () => {
       targetElement.removeEventListener('click', handleTargetClick);
     };
-  }, [advanceStep, currentStep, isActive, location.pathname, targetRect]);
+  }, [advanceStep, currentStep, isTutorialActive, location.pathname, targetRect]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isTutorialActive) {
       document.body.classList.remove('tutorial-active');
       return;
     }
@@ -435,7 +459,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     return () => {
       document.body.classList.remove('tutorial-active');
     };
-  }, [isActive]);
+  }, [isTutorialActive]);
 
   const cardStyle = useMemo<CSSProperties>(() => {
     if (isMobile) {
@@ -595,16 +619,16 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   return (
     <TutorialContext.Provider
       value={{
-        isActive,
-        currentStepId: isActive ? currentStep?.id ?? null : null,
-        tutorialQuestId,
-        tutorialCompletionId,
+        isActive: isTutorialActive,
+        currentStepId: isTutorialActive ? currentStep?.id ?? null : null,
+        tutorialQuestId: isTutorialActive ? tutorialQuestId : null,
+        tutorialCompletionId: isTutorialActive ? tutorialCompletionId : null,
         restartTutorial,
       }}
     >
       {children}
 
-      {isActive && currentStep && shouldRenderGuideCard && (
+      {isTutorialActive && currentStep && shouldRenderGuideCard && (
         <>
           {shouldHighlightTarget ? (
             <div className="pointer-events-none fixed inset-0 z-[80]">
