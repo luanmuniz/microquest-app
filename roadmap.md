@@ -1,6 +1,6 @@
-# MicroQuest Roadmap (User View)
+# Microquest Roadmap (User View)
 
-This roadmap focuses only on user-facing improvements: UI polish, usability, and features that make MicroQuest more valuable for people using it on the web.
+This roadmap focuses only on user-facing improvements: UI polish, usability, and features that make Microquest more valuable for people using it on the web.
 
 ## Phase 1: Launch Essentials (Highest Impact)
 

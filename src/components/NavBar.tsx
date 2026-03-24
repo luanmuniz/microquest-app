@@ -3,15 +3,14 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   CircleHelp,
-  Database,
-  Download,
+  HardDrive,
+  HardDriveDownload,
+  HardDriveUpload,
   History,
   Menu,
   Scroll,
-  Sparkles,
   Sun,
   Trash2,
-  Upload,
   X,
 } from 'lucide-react';
 import {
@@ -122,7 +121,7 @@ export function Navbar() {
       setIsUserMenuOpen(false);
 
       toast.success('Data exported', {
-        description: 'Your MicroQuest data was downloaded as a JSON file.',
+        description: 'Your Microquest data was downloaded as a JSON file.',
       });
     } catch {
       toast.error('Export failed', {
@@ -164,10 +163,10 @@ export function Navbar() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-lg">
         <nav className="container mx-auto flex h-14 items-center justify-between px-3 sm:px-4 lg:h-16">
           <Link to="/quests" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-soft lg:h-9 lg:w-9">
-              <Sparkles className="h-4 w-4 text-primary-foreground lg:h-5 lg:w-5" />
-            </div>
-            <span className="text-base font-bold tracking-tight lg:text-lg">MicroQuest</span>
+	    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-soft lg:h-9 lg:w-9">
+	      <Scroll className="h-4 w-4 text-primary-foreground lg:h-5 lg:w-5" />
+	    </div>
+	    <span className="text-base font-bold tracking-tight lg:text-lg">Microquest</span>
           </Link>
 
           {isMobile ? (
@@ -226,8 +225,8 @@ export function Navbar() {
                   aria-expanded={isUserMenuOpen}
                   aria-haspopup="menu"
                 >
-                  <Database className="h-4 w-4" />
-                  <span>Data</span>
+                  <HardDrive className="h-4 w-4" />
+                  <span>Backup</span>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform ${
                       isUserMenuOpen ? 'rotate-180' : ''
@@ -246,7 +245,7 @@ export function Navbar() {
                       onClick={handleOpenImportDialog}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                     >
-                      <Upload className="h-4 w-4" />
+                      <HardDriveDownload className="h-4 w-4" />
                       Import data
                     </button>
                     <button
@@ -255,7 +254,7 @@ export function Navbar() {
                       onClick={handleOpenExportDialog}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                     >
-                      <Download className="h-4 w-4" />
+                      <HardDriveUpload className="h-4 w-4" />
                       Export data
                     </button>
                     <button
@@ -348,7 +347,7 @@ export function Navbar() {
                     onClick={handleOpenImportDialog}
                     className={menuActionClassName}
                   >
-                    <Upload className="h-4 w-4" />
+                    <HardDriveUpload className="h-4 w-4" />
                     Import data
                   </button>
                   <button
@@ -357,7 +356,7 @@ export function Navbar() {
                     onClick={handleOpenExportDialog}
                     className={menuActionClassName}
                   >
-                    <Download className="h-4 w-4" />
+                    <HardDriveDownload className="h-4 w-4" />
                     Export data
                   </button>
                   <button
@@ -387,8 +386,8 @@ export function Navbar() {
             </DialogTitle>
             <DialogDescription>
               {hasExportableData
-                ? 'Export downloads a JSON backup of your current MicroQuest data to this device. It includes your quests, today&apos;s selected quest, and completion history.'
-                : 'There is no data to export yet. Once MicroQuest has quests, today&apos;s selected quest, or completion history, you can download them as a JSON backup from here.'}
+                ? 'Export downloads a JSON backup of your current Microquest data to this device. It includes your quests, today&apos;s selected quest, and completion history.'
+                : 'There is no data to export yet. Once Microquest has quests, today&apos;s selected quest, or completion history, you can download them as a JSON backup from here.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

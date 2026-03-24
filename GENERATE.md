@@ -1,12 +1,12 @@
-# MicroQuest Redesign Master Prompt
+# Microquest Redesign Master Prompt
 
 Copy and paste the prompt below into your design-generating AI tool.
 
 ```md
-You are a senior product designer and UX strategist. Redesign the website/app experience for **MicroQuest**.
+You are a senior product designer and UX strategist. Redesign the website/app experience for **Microquest**.
 
 ## Project Intent
-MicroQuest is a **local-first personal habit and progress app** that helps users turn intentions into action through one focused daily quest.
+Microquest is a **local-first personal habit and progress app** that helps users turn intentions into action through one focused daily quest.
 The product should feel supportive, motivating, and clear, with low friction and strong momentum.
 
 ## Core Product Purpose (Must Keep)

@@ -6,7 +6,7 @@ export interface QuestDataSnapshot {
   completions: QuestCompletion[];
 }
 
-const INVALID_EXPORT_MESSAGE = 'This file is not a valid MicroQuest backup.';
+const INVALID_EXPORT_MESSAGE = 'This file is not a valid Microquest backup.';
 const INVALID_JSON_MESSAGE = 'This file is not valid JSON.';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

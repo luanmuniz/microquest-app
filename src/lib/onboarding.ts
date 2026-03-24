@@ -33,6 +33,14 @@ export function markTutorialSeen(): void {
   }
 }
 
+export function clearTutorialSeen(): void {
+  try {
+    localStorage.removeItem(TUTORIAL_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors (private mode, restricted environments, etc.)
+  }
+}
+
 export function clearOnboardingState(): void {
   try {
     localStorage.removeItem(WELCOME_STORAGE_KEY);

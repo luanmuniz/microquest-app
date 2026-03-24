@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   CheckCircle2,
@@ -21,7 +21,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useQuests } from '@/context';
-import { markTutorialSeen, markWelcomeSeen } from '@/lib/onboarding';
+import {
+  clearTutorialSeen,
+  markTutorialSeen,
+  markWelcomeSeen,
+} from '@/lib/onboarding';
+import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
 const steps = [
@@ -47,7 +52,15 @@ const steps = [
 
 export default function WelcomePage() {
   const { startFresh } = useQuests();
+  const { restartTutorial } = useTutorial();
   const navigate = useNavigate();
+
+  const handleStartTutorial = () => {
+    markWelcomeSeen();
+    clearTutorialSeen();
+    restartTutorial();
+    navigate('/quests');
+  };
 
   const handleStartFresh = () => {
     startFresh();
@@ -59,6 +72,12 @@ export default function WelcomePage() {
     navigate('/quests');
   };
 
+  const handleKeepData = () => {
+    markWelcomeSeen();
+    markTutorialSeen();
+    navigate('/quests');
+  }
+
   return (
     <div className="mx-auto max-w-5xl animate-fade-in space-y-10 lg:space-y-12">
       <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-today-highlight p-5 shadow-medium sm:p-6 lg:p-12">
@@ -66,25 +85,26 @@ export default function WelcomePage() {
         <div className="relative max-w-2xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:text-sm">
             <Sparkles className="h-4 w-4" />
-            Welcome to MicroQuest
+            Welcome to Microquest
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-5xl">
             Small quests, Daily momentum.
           </h1>
           <p className="mt-4 text-sm text-muted-foreground sm:text-base lg:text-lg">
-            MicroQuest helps you turn intentions into action with one focused
+            Microquest helps you turn intentions into action with one focused
             daily quest. Build your quest list, choose your daily focus, and
             keep a history of completed wins.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 lg:mt-8">
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="btn-quest h-11 w-full px-6 text-base sm:w-auto">
-                <Link to="/quests" onClick={markWelcomeSeen}>
-                  Start Using MicroQuest
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button
+                className="btn-quest h-11 w-full px-6 text-base sm:w-auto"
+                onClick={handleStartTutorial}
+              >
+                Start Using Microquest
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
 
               <AlertDialog>
@@ -103,7 +123,7 @@ export default function WelcomePage() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Keep current data</AlertDialogCancel>
+                    <AlertDialogCancel onClick={handleKeepData} >Keep current data</AlertDialogCancel>
                     <AlertDialogAction onClick={handleStartFresh} className="btn-quest">
                       Clear and start fresh
                     </AlertDialogAction>

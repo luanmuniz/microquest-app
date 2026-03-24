@@ -141,7 +141,7 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
       <DialogContent className="max-w-xl gap-5">
         <div className="mx-auto h-1.5 w-12 rounded-full bg-border/80 lg:hidden" />
         <DialogHeader className="pr-8">
-          <DialogTitle>Import MicroQuest data</DialogTitle>
+          <DialogTitle>Import Microquest data</DialogTitle>
           <DialogDescription>
             Upload a JSON backup exported from this app. Importing replaces your current
             quests, today&apos;s quest, and completion history on this device.
@@ -198,7 +198,7 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
           <div className="mt-4 space-y-1">
             <p className="text-base font-semibold text-foreground">Drop your JSON file here</p>
             <p className="text-sm text-muted-foreground">
-              Click to browse, or drag and drop a backup exported by MicroQuest.
+              Click to browse, or drag and drop a backup exported by Microquest.
             </p>
           </div>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">

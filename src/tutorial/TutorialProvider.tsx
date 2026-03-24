@@ -11,6 +11,16 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useQuests } from '@/context';
 import {
   hasSeenTutorial,
@@ -44,6 +54,7 @@ interface TutorialContextValue {
   currentStepId: TutorialStepId | null;
   tutorialQuestId: string | null;
   tutorialCompletionId: string | null;
+  restartTutorial: () => void;
 }
 
 const tutorialSteps: TutorialStep[] = [
@@ -100,7 +111,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 'cleanup-prompt',
     title: 'Tutorial Complete',
     description:
-      'Do you want to clean this tutorial data and start using MicroQuest with a fresh slate?',
+      'Do you want to clean this tutorial data and start using Microquest with a fresh slate?',
   },
 ];
 
@@ -109,6 +120,7 @@ const defaultContextValue: TutorialContextValue = {
   currentStepId: null,
   tutorialQuestId: null,
   tutorialCompletionId: null,
+  restartTutorial: () => {},
 };
 
 const TutorialContext = createContext<TutorialContextValue>(defaultContextValue);
@@ -128,33 +140,36 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const [tutorialCompletionId, setTutorialCompletionId] = useState<string | null>(null);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [targetStepId, setTargetStepId] = useState<TutorialStepId | null>(null);
-  const [showSkipCleanupPrompt, setShowSkipCleanupPrompt] = useState(false);
+  const [isSkipDialogOpen, setIsSkipDialogOpen] = useState(false);
   const initialQuestIdsRef = useRef<Set<string>>(new Set());
   const currentStep = tutorialSteps[stepIndex];
 
-  const activateTutorial = useCallback(() => {
+  const restartTutorial = useCallback(() => {
     setIsActive(true);
     setStepIndex(0);
     setTutorialQuestId(null);
     setTutorialCompletionId(null);
+    setTargetRect(null);
+    setTargetStepId(null);
+    setIsSkipDialogOpen(false);
     initialQuestIdsRef.current = new Set(quests.map((quest) => quest.id));
   }, [quests]);
 
-  const resetTutorialState = () => {
+  const resetTutorialState = useCallback(() => {
     setIsActive(false);
     setStepIndex(0);
     setTutorialQuestId(null);
     setTutorialCompletionId(null);
     setTargetRect(null);
     setTargetStepId(null);
-    setShowSkipCleanupPrompt(false);
+    setIsSkipDialogOpen(false);
     initialQuestIdsRef.current = new Set();
-  };
+  }, []);
 
-  const finishTutorial = () => {
+  const finishTutorial = useCallback(() => {
     markTutorialSeen();
     resetTutorialState();
-  };
+  }, [resetTutorialState]);
 
   const advanceStep = useCallback((expectedStepId: TutorialStepId) => {
     setStepIndex((previousIndex) => {
@@ -169,9 +184,9 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isActive && shouldRunTutorial() && location.pathname !== '/welcome') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      activateTutorial();
+      restartTutorial();
     }
-  }, [activateTutorial, isActive, location.pathname]);
+  }, [isActive, location.pathname, restartTutorial]);
 
   useEffect(() => {
     if (!isActive || !currentStep) {
@@ -230,6 +245,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [
+    advanceStep,
     completions,
     currentStep,
     isActive,
@@ -528,20 +544,21 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     currentStep?.targetSelector &&
       targetRect &&
       targetStepId === currentStep.id &&
-      !showSkipCleanupPrompt,
+      !isSkipDialogOpen,
   );
   const shouldShowCleanupPrompt = currentStep?.id === 'cleanup-prompt';
-  const shouldRenderGuideCard =
+  const shouldRenderGuideCard = !isSkipDialogOpen && (
     shouldHighlightTarget ||
     shouldShowCleanupPrompt ||
-    showSkipCleanupPrompt ||
-    Boolean(currentStep?.manualAdvance);
+    Boolean(currentStep?.manualAdvance)
+  );
 
   const handleSkipTutorial = () => {
-    setShowSkipCleanupPrompt(true);
+    setIsSkipDialogOpen(true);
   };
 
   const handleSkipKeepData = () => {
+    setIsSkipDialogOpen(false);
     finishTutorial();
     toast.success('Tutorial skipped', {
       description: 'You can still use the app normally and explore on your own.',
@@ -549,6 +566,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   };
 
   const handleSkipCleanData = () => {
+    setIsSkipDialogOpen(false);
     startFresh();
     finishTutorial();
     navigate('/quests');
@@ -570,7 +588,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     finishTutorial();
     navigate('/quests');
     toast.success('Tutorial data cleaned', {
-      description: 'You now have a fresh workspace to start using MicroQuest.',
+      description: 'You now have a fresh workspace to start using Microquest.',
     });
   };
 
@@ -581,6 +599,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
         currentStepId: isActive ? currentStep?.id ?? null : null,
         tutorialQuestId,
         tutorialCompletionId,
+        restartTutorial,
       }}
     >
       {children}
@@ -612,24 +631,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
               {currentStep.description}
             </p>
 
-            {showSkipCleanupPrompt ? (
-              <div>
-                <h4 className="mt-4 text-sm font-medium text-foreground">
-                  Before skipping, do you want to clean tutorial quest data?
-                </h4>
-                <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:justify-end">
-                  <Button variant="ghost" onClick={() => setShowSkipCleanupPrompt(false)}>
-                    Continue tutorial
-                  </Button>
-                  <Button variant="outline" onClick={handleSkipKeepData}>
-                    Skip and keep data
-                  </Button>
-                  <Button className="btn-quest" onClick={handleSkipCleanData}>
-                    Skip and clean data
-                  </Button>
-                </div>
-              </div>
-            ) : currentStep.id === 'cleanup-prompt' ? (
+            {currentStep.id === 'cleanup-prompt' ? (
               <div className="mt-5 flex flex-col gap-2 lg:flex-row lg:justify-end">
                 <Button variant="outline" onClick={handleKeepTutorialData}>
                   Keep tutorial data
@@ -660,6 +662,38 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
           </div>
         </>
       )}
+
+      <AlertDialog open={isSkipDialogOpen} onOpenChange={setIsSkipDialogOpen}>
+        <AlertDialogContent className="max-w-xl">
+          <AlertDialogClose aria-label="Close skip tutorial dialog" />
+          <AlertDialogHeader className="pr-8">
+            <AlertDialogTitle>Skip tutorial?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can stop the guided tutorial now and either keep the tutorial
+              data you created so far or remove it and continue with a fresh
+              workspace.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="lg:flex-wrap lg:gap-2 lg:space-x-0">
+            <AlertDialogCancel>Continue tutorial</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full lg:w-auto"
+              onClick={handleSkipKeepData}
+            >
+              Skip and keep data
+            </Button>
+            <Button
+              type="button"
+              className="btn-quest w-full lg:w-auto"
+              onClick={handleSkipCleanData}
+            >
+              Skip and clean data
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TutorialContext.Provider>
   );
 }
