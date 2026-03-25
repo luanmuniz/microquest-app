@@ -273,3 +273,13 @@ For release preparation, the most important behaviors to preserve are:
 - Predictable recovery from invalid stored data.
 
 These behaviors define the current user promise of Microquest and should be treated as the basis for QA and pre-release user testing.
+
+## Next Steps
+
+After the first release, the next steps for the project include:
+
+- Create a user testing plan to gather feedback on the onboarding experience, core loop, and overall usability.
+- Collecting user feedback and usage data to identify pain points and opportunities.
+- Iterating on the onboarding experience to further reduce friction and clarify the product promise.
+- Refining the UI and interaction patterns based on real-world usage and feedback.
+- Ensuring accessibility and performance optimizations across devices.

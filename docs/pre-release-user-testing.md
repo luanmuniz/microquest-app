@@ -278,14 +278,16 @@ Ask:
 
 Rate each from 1 to 5:
 
-- Welcome explanation
-- Quest list
-- Today's Quest page
-- Reflection field
-- History
-- Guided tutorial if shown
-- Export backup
-- Import backup
+| Item | Rating 1-5 |
+| --- | --- |
+| Welcome explanation |  |
+| Quest list |  |
+| Today's Quest page |  |
+| Reflection field |  |
+| History |  |
+| Guided tutorial if shown |  |
+| Export backup |  |
+| Import backup |  |
 
 ### 10.3 Trust And Risk Questions
 
