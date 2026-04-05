@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuests } from '@/context';
 import { QuestCard } from '@/components/Quests/QuestCard';
 import { QuestForm } from '@/components/Quests/QuestForm';
 import { EmptyState } from '@/components/Quests/EmptyState';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import type { Quest } from '@/hooks/useQuestStore';
 import { 
   Dialog, 
@@ -23,17 +24,117 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Info, Plus, Scroll } from 'lucide-react';
+import { Info, Plus, Scroll, Search } from 'lucide-react';
 import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
+const normalizeSearchValue = (value: string) =>
+  value.toLowerCase().trim().replace(/\s+/g, ' ');
+
+const isOrderedSubsequence = (needle: string, haystack: string) => {
+  if (!needle) return true;
+
+  let needleIndex = 0;
+  for (const char of haystack) {
+    if (char === needle[needleIndex]) {
+      needleIndex += 1;
+      if (needleIndex === needle.length) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+const getQuestSearchCandidates = (quest: Quest) => {
+  const normalizedTitle = normalizeSearchValue(quest.title);
+  const normalizedDescription = normalizeSearchValue(quest.description);
+  const titleWords = normalizedTitle.split(' ').filter(Boolean);
+  const descriptionWords = normalizedDescription.split(' ').filter(Boolean);
+  const collapsedTitle = normalizedTitle.replace(/\s+/g, '');
+  const collapsedDescription = normalizedDescription.replace(/\s+/g, '');
+
+  const candidates = [
+    normalizeSearchValue(`${quest.title} ${quest.description}`),
+    ...titleWords,
+    ...descriptionWords,
+  ];
+
+  if (collapsedTitle) {
+    candidates.push(collapsedTitle);
+  }
+
+  if (collapsedDescription) {
+    candidates.push(collapsedDescription);
+  }
+
+  return candidates;
+};
+
+const matchesQueryToken = (token: string, searchCandidates: string[]) => {
+  if (!token) return true;
+  if (searchCandidates.some((candidate) => candidate.includes(token))) return true;
+  if (token.length < 3) return false;
+
+  return searchCandidates.some(
+    (candidate) =>
+      candidate.startsWith(token[0]) && isOrderedSubsequence(token, candidate),
+  );
+};
+
+const matchesQuestQuery = (quest: Quest, normalizedQuery: string) => {
+  if (!normalizedQuery) return true;
+
+  const searchCandidates = getQuestSearchCandidates(quest);
+  const queryTokens = normalizedQuery.split(' ').filter(Boolean);
+
+  return queryTokens.every((token) => matchesQueryToken(token, searchCandidates));
+};
+
 export default function QuestsPage() {
-  const { quests, todayQuestId, addQuest, updateQuest, deleteQuest, setTodayQuest } = useQuests();
+  const {
+    quests,
+    todayQuestId,
+    addQuest,
+    updateQuest,
+    toggleFavoriteQuest,
+    deleteQuest,
+    setTodayQuest,
+  } = useQuests();
   const { currentStepId, tutorialQuestId } = useTutorial();
   const [showForm, setShowForm] = useState(false);
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [deletingQuestId, setDeletingQuestId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const hasSampleQuests = quests.some((quest) => quest.isSample);
+  const normalizedSearchQuery = useMemo(
+    () => normalizeSearchValue(searchQuery),
+    [searchQuery],
+  );
+  const filteredQuests = useMemo(
+    () => quests.filter((quest) => matchesQuestQuery(quest, normalizedSearchQuery)),
+    [quests, normalizedSearchQuery],
+  );
+  const favoriteFirstQuests = useMemo(() => {
+    const favoriteQuests: Quest[] = [];
+    const regularQuests: Quest[] = [];
+
+    filteredQuests.forEach((quest) => {
+      if (quest.isFavorite) {
+        favoriteQuests.push(quest);
+        return;
+      }
+
+      regularQuests.push(quest);
+    });
+
+    return [...favoriteQuests, ...regularQuests];
+  }, [filteredQuests]);
+  const isFiltering = normalizedSearchQuery.length > 0;
+  const headerQuestCount = isFiltering
+    ? `${filteredQuests.length} of ${quests.length} quest${quests.length !== 1 ? 's' : ''}`
+    : `${quests.length} quest${quests.length !== 1 ? 's' : ''}`;
 
   const handleCreate = (title: string, description: string) => {
     addQuest(title, description);
@@ -70,6 +171,24 @@ export default function QuestsPage() {
     });
   };
 
+  const handleToggleFavorite = (questId: string) => {
+    const quest = quests.find((q) => q.id === questId);
+    toggleFavoriteQuest(questId);
+
+    if (!quest) return;
+
+    if (quest.isFavorite) {
+      toast.success('Removed from favorites', {
+        description: `"${quest.title}" was removed from your favorites.`,
+      });
+      return;
+    }
+
+    toast.success('Added to favorites', {
+      description: `"${quest.title}" was moved to the top of your list.`,
+    });
+  };
+
   return (
     <div className="mx-auto max-w-2xl">
       {/* Header */}
@@ -77,7 +196,7 @@ export default function QuestsPage() {
         <div>
           <h1 className="page-header">Your Quests</h1>
           <p className="text-muted-foreground mt-1">
-            {quests.length} quest{quests.length !== 1 ? 's' : ''} in your collection
+            {headerQuestCount} in your collection
           </p>
         </div>
         
@@ -117,21 +236,46 @@ export default function QuestsPage() {
             </div>
           )}
 
-          <div className="space-y-3">
-            {quests.map(quest => (
-              <QuestCard
-                key={quest.id}
-                quest={quest}
-                isToday={quest.id === todayQuestId}
-                onSetToday={() => handleSetToday(quest.id)}
-                onEdit={() => setEditingQuest(quest)}
-                onDelete={() => setDeletingQuestId(quest.id)}
-                setTodayTutorialTarget={
-                  currentStepId === 'set-today' && tutorialQuestId === quest.id
-                }
+          <div className="mb-4">
+            <label htmlFor="quest-search" className="sr-only">
+              Search quests
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="quest-search"
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search quests..."
+                aria-label="Search quests"
+                className="h-9 pl-9"
               />
-            ))}
+            </div>
           </div>
+
+          {favoriteFirstQuests.length > 0 ? (
+            <div className="space-y-3">
+              {favoriteFirstQuests.map((quest) => (
+                <QuestCard
+                  key={quest.id}
+                  quest={quest}
+                  isToday={quest.id === todayQuestId}
+                  onToggleFavorite={() => handleToggleFavorite(quest.id)}
+                  onSetToday={() => handleSetToday(quest.id)}
+                  onEdit={() => setEditingQuest(quest)}
+                  onDelete={() => setDeletingQuestId(quest.id)}
+                  setTodayTutorialTarget={
+                    currentStepId === 'set-today' && tutorialQuestId === quest.id
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+              No quests match "{searchQuery.trim()}". Try a different keyword.
+            </div>
+          )}
         </>
       )}
 

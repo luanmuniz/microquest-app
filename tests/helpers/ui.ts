@@ -35,6 +35,12 @@ export async function setTodayForQuest(page: Page, questTitle: string): Promise<
   await questCard(page, questTitle).locator('button[title="Set as Today\'s Quest"]').click();
 }
 
+export async function toggleFavoriteForQuest(page: Page, questTitle: string): Promise<void> {
+  await questCard(page, questTitle)
+    .locator('button[title="Add to favorites"], button[title="Remove from favorites"]')
+    .click();
+}
+
 export async function editQuest(
   page: Page,
   existingTitle: string,

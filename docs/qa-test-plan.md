@@ -4,6 +4,8 @@
 
 This document defines the manual quality-assurance plan for the current implemented release of Microquest. It is intended to verify that all visible features, routes, dialogs, state transitions, and error-handling flows work correctly before production release.
 
+It also defines the compatibility reporting method required for submission: each test run must capture and report behavior across devices, operating systems, browsers, and screen resolutions, with findings documented in a reusable results workbook.
+
 The test plan is limited to features that are already implemented in the current codebase. Roadmap items and future enhancements are intentionally excluded.
 
 ## 2. Scope
@@ -33,18 +35,46 @@ The test plan is limited to features that are already implemented in the current
 
 The following environments are release-critical because behavior changes across browsers and across the `1024px` breakpoint.
 
-| Environment ID | Device Class | Browser | Minimum Focus |
-| --- | --- | --- | --- |
-| ENV-01 | Desktop | Latest Chrome | Primary desktop validation and tutorial coverage |
-| ENV-02 | Desktop | Latest Safari | Desktop compatibility and tutorial coverage |
-| ENV-03 | Mobile | iPhone Safari | Mobile navigation, onboarding without tutorial, dialogs, and data controls |
-| ENV-04 | Mobile | Android Chrome | Mobile navigation, onboarding without tutorial, dialogs, and data controls |
+| Environment ID | Device Class | Representative Device | OS Family | Browser | Minimum Focus |
+| --- | --- | --- | --- | --- | --- |
+| ENV-01 | Desktop | Laptop or desktop workstation | macOS or Windows | Latest Chrome | Primary desktop validation and tutorial coverage |
+| ENV-02 | Desktop | Mac desktop or MacBook | macOS | Latest Safari | Desktop compatibility and tutorial coverage |
+| ENV-03 | Mobile | iPhone | iOS | Safari | Mobile navigation, onboarding without tutorial, dialogs, and data controls |
+| ENV-04 | Mobile | Android phone | Android | Chrome | Mobile navigation, onboarding without tutorial, dialogs, and data controls |
 
 ### 3.1 Breakpoint Requirement
 
 - Test at widths above `1024px` to verify desktop behavior.
 - Test below `1024px` to verify mobile behavior.
 - Treat the breakpoint as critical because navigation and tutorial behavior change at this threshold.
+
+### 3.2 Required Configuration Metadata For Reporting
+
+For every executed environment, record all of the following in `docs/qa-reporting/microquest-test-results-template.xlsx` on `Compatibility_Matrix`:
+
+1. Run ID and test date
+2. Tester name
+3. Environment ID (`ENV-01` to `ENV-04`)
+4. Device class and device model
+5. OS name and exact version
+6. Browser name and exact version
+7. Exact resolution in `W x H`
+8. Breakpoint class (`Desktop >=1024px` or `Mobile <1024px`)
+9. Appearance result
+10. Function result
+11. Screenshot IDs and notes
+
+### 3.3 Compatibility Execution Protocol
+
+Use this protocol for each full QA run:
+
+1. Create a new Run ID (for example `RUN-2026-04-04-A`) and start with a clean state.
+2. Execute each environment in the matrix (`ENV-01` to `ENV-04`) and complete one `Compatibility_Matrix` row per environment.
+3. For each environment, verify appearance on `#/welcome`, `#/quests`, `#/today`, and `#/history`.
+4. For each environment, verify functional behavior using at least `QA-17`, `QA-18`, `QA-20`, `QA-23`, and `QA-25`, then execute the remaining planned cases for release confidence.
+5. Log every executed test case in `QA_Case_Results`, including passes and failures.
+6. Assign screenshot IDs for key states and findings. Screenshot evidence is optional for clean passes, but mandatory for failures.
+7. If user-testing sessions are part of the same release cycle, keep finding IDs consistent across `QA_Case_Results`, `User_Session_Tasks`, and `Findings_List`.
 
 ## 4. Test Data And Reset Rules
 
@@ -77,33 +107,49 @@ For import and export tests, keep the following files ready:
 - A structurally invalid JSON file missing required fields
 - A JSON file where `todayQuestId` points to a quest ID that does not exist in `quests`
 
-## 5. Failure Response Guidance
+## 5. Evidence And Failure Response Guidance
 
-Follow this protocol whenever any test fails.
+Use the logging requirements below for all runs. Follow the failure protocol whenever any test fails.
 
-### 5.1 Evidence To Capture Before Retesting
+### 5.1 Required Logging For Every Run
+
+Capture the following for both successful and failed executions:
+
+1. Run ID
+2. QA case ID
+3. Environment ID
+4. Device model
+5. OS and version
+6. Browser and version
+7. Resolution and breakpoint class
+8. Result status (`Pass`, `Fail`, or `Blocked`)
+9. Screenshot ID references when available
+10. Notes explaining important behaviors, not only defects
+
+### 5.2 Evidence To Capture Before Retesting A Failure
 
 Capture all of the following before refreshing, clearing data, or re-running the test:
 
 1. Browser and version
-2. Device type
-3. Viewport size or breakpoint category
-4. Current route, including the hash path
-5. Exact preconditions used
-6. Exact reproduction steps
-7. Screenshot or screen recording of the failed state
-8. Visible dialog text, empty-state text, and toast text if relevant
-9. Console errors or warnings if relevant
-10. For import or export failures, the file name, file source, and a brief description of file contents
+2. OS and exact version
+3. Device type and model
+4. Exact resolution and breakpoint category
+5. Current route, including the hash path
+6. Exact preconditions used
+7. Exact reproduction steps
+8. Screenshot or screen recording of the failed state
+9. Visible dialog text, empty-state text, and toast text if relevant
+10. Console errors or warnings if relevant
+11. For import or export failures, the file name, file source, and a brief description of file contents
 
-### 5.2 Immediate Containment Rules
+### 5.3 Immediate Containment Rules
 
 - Do not clear local storage until the failing state has been recorded.
 - Do not overwrite a backup file that may be needed for debugging.
 - Do not continue into later cases if the failure blocks a core state transition.
 - If data corruption is suspected, export the current state if possible before cleaning anything.
 
-### 5.3 Severity Guidance
+### 5.4 Severity Guidance
 
 - Blocker:
   Core app usage cannot continue, or data is lost unexpectedly.
@@ -630,6 +676,31 @@ Capture all of the following before refreshing, clearing data, or re-running the
 - If Test Fails:
   Capture the entered route, the rendered page content, and any console errors associated with route resolution.
 
+### QA-26 Quest List Live Fuzzy Search
+
+- Objective:
+  Verify that users can quickly find quests from large lists using live fuzzy filtering on the Quests page.
+- Preconditions:
+  User is on Quests with at least three quests and onboarding complete.
+- Steps:
+  1. Locate the search field above the quest list.
+  2. Type a title keyword (for example `read`) and observe filtering.
+  3. Replace the query with a description keyword (for example `full-body`) and observe filtering.
+  4. Replace the query with an ordered-subsequence typo-style query (for example `drkwtr`) and observe filtering.
+  5. Replace the query with text that should not match any quest.
+  6. Clear the query and confirm full list restoration.
+  7. With a non-empty query still applied, set a visible quest as today's quest and confirm it succeeds.
+- Expected Result:
+  Filtering occurs as the user types, matching title and description case-insensitively with light fuzzy tolerance. No-match state is shown inline, clearing restores the full list, and "Set as today's quest" still works from filtered results.
+- Possible Fail Scenarios:
+  - Search input is missing or not interactive.
+  - Matches work only for exact titles and ignore descriptions.
+  - Query does not update results in real time.
+  - No-match state does not appear or full list does not restore after clearing.
+  - Setting today's quest fails when list is filtered.
+- If Test Fails:
+  Capture the typed query, visible results count, no-match state text, and whether today-selection behavior changed while filtering.
+
 ## 7. Coverage Check For Required Negative Cases
 
 The following release-critical negative scenarios must be executed and signed off:
@@ -647,6 +718,7 @@ The following release-critical negative scenarios must be executed and signed of
 | Empty Today state | QA-12 |
 | Empty History state | QA-16 |
 | Recovery from corrupted local storage | QA-24 |
+| Quest search no-match state | QA-26 |
 
 ## 8. Release Exit Criteria
 
@@ -659,6 +731,9 @@ The release is ready only when all conditions below are met:
 5. Mobile navigation and action-sheet behavior have been verified below the `1024px` breakpoint.
 6. Import, export, clean-data reset, and persistence behavior have been validated successfully at least once on desktop and once on mobile.
 7. Route coverage has been confirmed for `#/welcome`, `#/quests`, `#/today`, `#/history`, and an unmatched fallback route.
+8. `Compatibility_Matrix` contains one completed row for each environment (`ENV-01` to `ENV-04`) with device, OS, browser, and exact resolution values.
+9. `QA_Case_Results` includes all executed cases with outcome and evidence references.
+10. Findings are captured in `Findings_List` with priority, status, and retest result fields populated as work progresses.
 
 ## 9. Final QA Sign-Off Checklist
 
@@ -673,5 +748,21 @@ The release is ready only when all conditions below are met:
 - Reload persistence works.
 - Corrupted local storage does not break the app.
 - Fallback routing works.
+- Compatibility evidence is logged for all required configurations.
+- Report artifacts are ready in `docs/qa-reporting`.
 
 If any item above cannot be checked as complete, the release should remain in pre-production until the risk is resolved or formally accepted.
+
+## 10. Report-Ready Output For Submission
+
+Prepare the following before submitting release evidence:
+
+1. A completed workbook at `docs/qa-reporting/microquest-test-results-template.xlsx` with:
+   - `Compatibility_Matrix` filled for all required environments
+   - `QA_Case_Results` filled for all executed QA cases
+   - `User_Session_Tasks` filled for each moderated participant session
+   - `Findings_List` updated with current fix and retest status
+2. A completed narrative report using `docs/qa-reporting/microquest-test-report-template.md`.
+3. Optional screenshot evidence stored with consistent IDs referenced in workbook rows and the report.
+
+This package is the official method-and-findings record for manual compatibility and user-testing submission.

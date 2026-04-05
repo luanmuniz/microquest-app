@@ -5,7 +5,10 @@ import { readDownloadJson } from '../helpers/files';
 import { openDataActionDialog } from '../helpers/ui';
 
 test('QA-18 Export With Existing Data', async ({ page }, testInfo) => {
-  const quest = createBaseQuest('q-export-1', 'Exportable Quest', 'Available for export');
+  const quest = {
+    ...createBaseQuest('q-export-1', 'Exportable Quest', 'Available for export'),
+    isFavorite: true,
+  };
   const completion = createBaseCompletion('c-export-1', quest.id, quest.title, 'Completed');
   await seedState(page, {
     snapshot: createSnapshot([quest], quest.id, [completion]),
@@ -24,6 +27,7 @@ test('QA-18 Export With Existing Data', async ({ page }, testInfo) => {
 
   const exported = await readDownloadJson(download);
   expect(exported.quests).toHaveLength(1);
+  expect(exported.quests[0]?.isFavorite).toBe(true);
   expect(exported.todayQuestId).toBe(quest.id);
   expect(exported.completions).toHaveLength(1);
 });

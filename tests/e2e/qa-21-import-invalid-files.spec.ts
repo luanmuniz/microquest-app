@@ -39,6 +39,26 @@ test('QA-21 Import Invalid Files', async ({ page }, testInfo) => {
       ),
       expected: 'This backup references a today quest that does not exist.',
     },
+    {
+      file: createImportFile(
+        'invalid-favorite-flag.json',
+        JSON.stringify(
+          {
+            quests: [
+              {
+                ...createBaseQuest('q-b', 'Quest B'),
+                isFavorite: 'yes',
+              },
+            ],
+            todayQuestId: null,
+            completions: [],
+          },
+          null,
+          2,
+        ),
+      ),
+      expected: 'This backup contains an invalid quest entry.',
+    },
   ] as const;
 
   for (const invalidCase of invalidCases) {

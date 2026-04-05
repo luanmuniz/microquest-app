@@ -6,6 +6,11 @@ This document supports moderated user testing before production release. The goa
 
 The study is based only on the current implemented release. It does not test roadmap ideas or future features.
 
+This sheet also defines how to record session results for submission-ready reporting using:
+
+- `docs/qa-reporting/microquest-test-results-template.xlsx`
+- `docs/qa-reporting/microquest-test-report-template.md`
+
 ## 2. Research Goals
 
 The study should answer the following questions:
@@ -48,6 +53,7 @@ Recruit participants who broadly match expected end users of a lightweight perso
 - Screen recording or note-taking setup
 - A prepared valid JSON backup file for discussion if needed
 - Observation sheet and feedback form from this document
+- Results workbook at `docs/qa-reporting/microquest-test-results-template.xlsx`
 
 ### 4.3 Test Environment Preparation
 
@@ -61,6 +67,25 @@ Before each session:
 3. Confirm the device matches the intended session type:
    - Desktop session above `1024px`
    - Mobile session below `1024px`
+4. Capture baseline metadata before starting tasks:
+   - Session ID
+   - Environment ID (`ENV-01`, `ENV-02`, `ENV-03`, or `ENV-04`)
+   - Device model
+   - OS and version
+   - Browser and version
+   - Exact resolution or viewport (`W x H`)
+
+### 4.4 Session Logging Rules
+
+For each participant session:
+
+1. Add one row per task in `User_Session_Tasks`.
+2. Use outcome values exactly as written:
+   - `Completed independently`
+   - `Completed with help`
+   - `Not completed`
+3. When a notable issue appears, create or reuse a finding ID in `Findings_List`.
+4. If screenshots are captured, reference them by screenshot ID in task notes or findings evidence.
 
 ## 5. Moderator Script
 
@@ -70,30 +95,29 @@ Use the following script with minor natural adjustments as needed.
 
 Read or paraphrase:
 
-`Thank you for taking part. We are testing the product, not you. Please think aloud as you use the app and tell us what you expect to happen, what feels clear, and what feels confusing. Some tasks may feel easy and some may not. That is useful feedback for us.`
+> Thank you for taking part. We are testing the product, not you. Please think aloud as you use the app and tell us what you expect to happen, what feels clear, and what feels confusing. Some tasks may feel easy and some may not. That is useful feedback for us.
 
 ### 5.2 Expectations Script
 
 Read or paraphrase:
 
-`I may ask follow-up questions, but I will try not to guide you unless you become fully blocked. If something feels unclear, please say so in the moment.`
+> I may ask follow-up questions, but I will try not to guide you unless you become fully blocked. If something feels unclear, please say so in the moment.
 
 ### 5.3 Closing Script
 
 Read or paraphrase:
 
-`At the end, I will ask a few short questions about what felt helpful, what felt risky or confusing, and whether this product feels ready for real users.`
+> At the end, I will ask a few short questions about what felt helpful, what felt risky or confusing, and whether this product feels ready for real users.
 
 ## 6. Moderator Rules During The Session
 
 - Encourage think-aloud behavior, but do not explain the interface unless the participant is truly blocked.
-- If the participant asks a direct "what should I click?" question, reply with a neutral prompt such as:
-  `What would you expect to click here?`
+- If the participant asks a direct "what should I click?" question, reply with a neutral prompt such as: `What would you expect to click here?`
 - Record hesitation, misclicks, backtracking, and confidence changes.
 - Distinguish between:
-  - confusion caused by product wording,
-  - confusion caused by layout or navigation,
-  - confusion caused by data-risk concerns.
+  - confusion caused by product wording
+  - confusion caused by layout or navigation
+  - confusion caused by data-risk concerns
 
 ## 7. Breakpoint-Specific Testing Notes
 
@@ -115,24 +139,20 @@ Run the tasks in order. If the participant gets blocked for more than about two 
 
 ### Task 1: Understand The Welcome Screen
 
-- Prompt:
-  `Without clicking anything yet, tell me what you think this app is for and what you expect to do with it.`
-- Success Criteria:
-  The participant can explain that the app is for managing small daily quests or habit-like actions.
+- Prompt: `Without clicking anything yet, tell me what you think this app is for and what you expect to do with it.`
+- Success Criteria: The participant can explain that the app is for managing small daily quests or habit-like actions.
 - Watch For:
   - Misunderstanding the product as a game, a long-form journal, or a complex task manager
   - Missing the core idea of choosing one quest for today
 
 ### Task 2: Enter The App
 
-- Prompt:
-  `Please enter the app in the way that feels most natural to you.`
+- Prompt: `Please enter the app in the way that feels most natural to you.`
 - Success Criteria:
   The participant enters the main app without moderator help.
-- Desktop Note:
-  If the tutorial starts, let it continue naturally.
-- Mobile Note:
-  Confirm the participant notices the absence of tutorial and still understands what to do next.
+- Session Notes:
+  - Desktop: If the tutorial starts, let it continue naturally.
+  - Mobile: Confirm the participant notices the absence of tutorial and still understands what to do next.
 
 ### Task 3: Create A Personal Quest
 
@@ -161,8 +181,8 @@ Run the tasks in order. If the participant gets blocked for more than about two 
   `Go to today's quest, complete it, and add a short note about how it went.`
 - Success Criteria:
   The participant reaches Today, finds the reflection field, and completes the quest.
-- Desktop Note:
-  During tutorial, the participant must enter reflection text before completion.
+- Session Notes:
+  - Desktop: During tutorial, the participant must enter reflection text before completion.
 - Watch For:
   - Not noticing the Today page
   - Not understanding whether reflection is optional
@@ -212,13 +232,18 @@ Run the tasks in order. If the participant gets blocked for more than about two 
 
 ## 9. Observation Note Template
 
-Use this sheet during the session.
+Use this sheet during the session. Copy key values into `User_Session_Tasks` during or right after the session.
 
 | Field | Notes |
 | --- | --- |
+| Session ID |  |
 | Participant ID |  |
 | Session type | Desktop / Mobile |
-| Device and browser |  |
+| Environment ID | ENV-01 / ENV-02 / ENV-03 / ENV-04 |
+| Device model |  |
+| OS and version |  |
+| Browser and version |  |
+| Resolution (W x H) |  |
 | Date |  |
 | Moderator |  |
 | Overall confidence at start |  |
@@ -226,17 +251,17 @@ Use this sheet during the session.
 
 ### Task Observation Grid
 
-| Task | Completed independently | Completed with help | Not completed | Time | Key hesitation or confusion | Notable quote |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1. Understand Welcome |  |  |  |  |  |  |
-| 2. Enter app |  |  |  |  |  |  |
-| 3. Create quest |  |  |  |  |  |  |
-| 4. Choose today's quest |  |  |  |  |  |  |
-| 5. Complete with reflection |  |  |  |  |  |  |
-| 6. Find completed result |  |  |  |  |  |  |
-| 7. Revisit help |  |  |  |  |  |  |
-| 8. Export data |  |  |  |  |  |  |
-| 9. Locate import and reset |  |  |  |  |  |  |
+| Task | Completed independently | Completed with help | Not completed | Time | Key hesitation or confusion | Notable quote | Finding ID |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1. Understand Welcome |  |  |  |  |  |  |  |
+| 2. Enter app |  |  |  |  |  |  |  |
+| 3. Create quest |  |  |  |  |  |  |  |
+| 4. Choose today's quest |  |  |  |  |  |  |  |
+| 5. Complete with reflection |  |  |  |  |  |  |  |
+| 6. Find completed result |  |  |  |  |  |  |  |
+| 7. Revisit help |  |  |  |  |  |  |  |
+| 8. Export data |  |  |  |  |  |  |  |
+| 9. Locate import and reset |  |  |  |  |  |  |  |
 
 ### Additional Moderator Notes
 
@@ -313,6 +338,7 @@ Complete this immediately after each session while details are still fresh.
 
 | Debrief Field | Notes |
 | --- | --- |
+| Session ID |  |
 | Participant ID |  |
 | Top 3 issues observed |  |
 | Severity of each issue |  |
@@ -323,7 +349,7 @@ Complete this immediately after each session while details are still fresh.
 
 ## 12. Study Readout Expectations
 
-At the end of the pre-release study, summarize findings in the following categories:
+At the end of the pre-release study, summarize findings in the following categories inside `docs/qa-reporting/microquest-test-report-template.md`:
 
 - Onboarding clarity
 - Quest creation and management usability
@@ -334,3 +360,14 @@ At the end of the pre-release study, summarize findings in the following categor
 - Release blockers and recommended fixes
 
 The release should be considered at risk if multiple participants fail to complete the core loop or show consistent distrust in backup and destructive actions.
+
+## 13. From Findings To Implementation Flow
+
+After each testing wave:
+
+1. Consolidate issues into `Findings_List` with one finding ID per unique issue.
+2. Write a short proposed fix for each finding.
+3. Implement fixes in the app and update `Implementation Status`.
+4. Re-test affected QA cases and user tasks.
+5. Record `Retest Result` and summary notes.
+6. Reflect implemented changes and remaining risks in the final report template.

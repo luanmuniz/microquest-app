@@ -11,6 +11,7 @@ export interface QuestSnapshotQuest {
   description: string;
   createdAt: string;
   isSample?: boolean;
+  isFavorite?: boolean;
 }
 
 export interface QuestSnapshotCompletion {
@@ -48,6 +49,7 @@ export function createQuest(
     description,
     createdAt: overrides?.createdAt ?? DEFAULT_TIMESTAMP,
     isSample: overrides?.isSample,
+    isFavorite: overrides?.isFavorite,
   };
 }
 

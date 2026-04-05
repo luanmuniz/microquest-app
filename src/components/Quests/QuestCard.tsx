@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
 import type { Quest } from '@/hooks/useQuestStore';
-import { Sun, Pencil, Trash2, Check } from 'lucide-react';
+import { Sun, Pencil, Trash2, Check, Star } from 'lucide-react';
 
 interface QuestCardProps {
   quest: Quest;
   isToday?: boolean;
+  onToggleFavorite?: () => void;
   onSetToday?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -14,11 +15,15 @@ interface QuestCardProps {
 export function QuestCard({
   quest,
   isToday,
+  onToggleFavorite,
   onSetToday,
   onEdit,
   onDelete,
   setTodayTutorialTarget,
 }: QuestCardProps) {
+  const isFavorite = quest.isFavorite === true;
+  const favoriteActionLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
+
   return (
     <div 
       className={`quest-card animate-fade-in ${
@@ -49,6 +54,23 @@ export function QuestCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-1 rounded-lg bg-muted/70 p-1 lg:rounded-none lg:bg-transparent lg:p-0">
+          {onToggleFavorite && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleFavorite}
+              className={`h-9 w-9 lg:h-8 lg:w-auto lg:px-2.5 ${
+                isFavorite
+                  ? 'text-amber-500 hover:bg-amber-500/10 hover:text-amber-600'
+                  : 'text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600'
+              }`}
+              title={favoriteActionLabel}
+              aria-label={favoriteActionLabel}
+            >
+              <Star className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+              <span className="hidden lg:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
+            </Button>
+          )}
           {!isToday && onSetToday && (
             <Button
               variant="ghost"

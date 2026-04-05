@@ -9,6 +9,7 @@ export interface Quest {
   description: string;
   createdAt: string;
   isSample?: boolean;
+  isFavorite?: boolean;
 }
 
 export interface QuestCompletion {
@@ -58,6 +59,7 @@ const createDefaultState = (): QuestState => {
       description: quest.description,
       createdAt,
       isSample: true,
+      isFavorite: false,
     })),
     todayQuestId: null,
     completions: [],
@@ -80,6 +82,7 @@ const normalizeQuest = (value: unknown): Quest | null => {
         ? quest.createdAt
         : new Date().toISOString(),
     isSample: Boolean(quest.isSample),
+    isFavorite: quest.isFavorite === true,
   };
 };
 
@@ -172,6 +175,7 @@ export function useQuestStore() {
       description,
       createdAt: new Date().toISOString(),
       isSample: false,
+      isFavorite: false,
     };
     setState((prev) => ({
       ...prev,
@@ -185,6 +189,15 @@ export function useQuestStore() {
       ...prev,
       quests: prev.quests.map((q) =>
         q.id === id ? { ...q, title, description, isSample: false } : q
+      ),
+    }));
+  }, []);
+
+  const toggleFavoriteQuest = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      quests: prev.quests.map((q) =>
+        q.id === id ? { ...q, isFavorite: !q.isFavorite } : q
       ),
     }));
   }, []);
@@ -246,6 +259,7 @@ export function useQuestStore() {
     todayQuest: getTodayQuest(),
     addQuest,
     updateQuest,
+    toggleFavoriteQuest,
     deleteQuest,
     setTodayQuest,
     completeToday,

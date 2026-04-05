@@ -47,12 +47,17 @@ const parseQuest = (value: unknown): Quest => {
     throw new Error('This backup contains an invalid quest entry.');
   }
 
+  if (typeof value.isFavorite !== 'undefined' && typeof value.isFavorite !== 'boolean') {
+    throw new Error('This backup contains an invalid quest entry.');
+  }
+
   return {
     id: value.id,
     title: value.title,
     description: value.description,
     createdAt: value.createdAt,
     ...(typeof value.isSample === 'boolean' ? { isSample: value.isSample } : {}),
+    ...(typeof value.isFavorite === 'boolean' ? { isFavorite: value.isFavorite } : {}),
   };
 };
 
