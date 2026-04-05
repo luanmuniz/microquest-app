@@ -26,6 +26,10 @@ interface QuestState {
   completions: QuestCompletion[];
 }
 
+interface CompleteTodayOptions {
+  keepToday?: boolean;
+}
+
 const EMPTY_STATE: QuestState = {
   quests: [],
   todayQuestId: null,
@@ -225,9 +229,10 @@ export function useQuestStore() {
   }, [state.quests, state.todayQuestId]);
 
   // Completion operations
-  const completeToday = useCallback((reflection: string) => {
+  const completeToday = useCallback((reflection: string, options: CompleteTodayOptions = {}) => {
     const todayQuest = getTodayQuest();
     if (!todayQuest) return;
+    const { keepToday = false } = options;
 
     const completion: QuestCompletion = {
       id: crypto.randomUUID(),
@@ -240,7 +245,7 @@ export function useQuestStore() {
     setState((prev) => ({
       ...prev,
       completions: [completion, ...prev.completions],
-      todayQuestId: null, // Reset today after completion
+      todayQuestId: keepToday ? todayQuest.id : null,
     }));
   }, [getTodayQuest]);
 

@@ -25,9 +25,12 @@ test('QA-14 Tutorial Reflection Requirement On Desktop', async ({ page }, testIn
 
   await expect(page.getByText('Fill the reflection and complete quest')).toBeVisible();
   const completeButton = page.getByRole('button', { name: 'Complete Quest' });
+  const restartButton = page.getByRole('button', { name: 'Complete and Restart' });
   await expect(completeButton).toBeDisabled();
+  await expect(restartButton).toBeDisabled();
   await page.getByLabel('Reflection (optional)').fill('Reflection required by tutorial.');
   await expect(completeButton).toBeEnabled();
+  await expect(restartButton).toBeEnabled();
   await completeButton.click();
 
   await expect(page.getByText('See it in history')).toBeVisible();

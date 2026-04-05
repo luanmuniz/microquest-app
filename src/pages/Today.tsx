@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/Quests/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Sun, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import { Sun, CheckCircle2, Sparkles, ArrowRight, RotateCcw } from 'lucide-react';
 import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
@@ -19,17 +19,26 @@ export default function TodayPage() {
   const [isCompleting, setIsCompleting] = useState(false);
   const isTutorialQuestToday = Boolean(tutorialQuestId && todayQuest?.id === tutorialQuestId);
   const shouldRequireReflection = isTutorialActive && isTutorialQuestToday;
+  const isCompletionDisabled = isCompleting || (shouldRequireReflection && !reflection.trim());
 
-  const handleComplete = () => {
+  const handleComplete = (keepToday: boolean) => {
     setIsCompleting(true);
     
     // Small delay for animation
     setTimeout(() => {
-      completeToday(reflection);
+      completeToday(reflection, { keepToday });
       setReflection('');
       setIsCompleting(false);
+
+      if (keepToday) {
+        toast.success('Quest completed and restarted', {
+          description: 'Your reflection is saved and this quest is ready for today again.',
+        });
+        return;
+      }
+
       toast.success('Quest completed 🎉', {
-        description: 'Your achievement has been recorded in history.'
+        description: 'Your achievement has been recorded in history.',
       });
     }, 300);
   };
@@ -95,15 +104,27 @@ export default function TodayPage() {
             />
           </div>
 
-          <Button 
-            onClick={handleComplete} 
-            disabled={isCompleting || (shouldRequireReflection && !reflection.trim())}
-            className="btn-quest h-12 w-full text-base"
-            data-tutorial-id={isTutorialQuestToday ? 'complete-quest-button' : undefined}
-          >
-            <CheckCircle2 className="mr-2 h-5 w-5" />
-            Complete Quest
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button 
+              onClick={() => handleComplete(false)} 
+              disabled={isCompletionDisabled}
+              className="btn-quest h-12 w-full text-base"
+              data-tutorial-id={isTutorialQuestToday ? 'complete-quest-button' : undefined}
+            >
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              Complete Quest
+            </Button>
+
+            <Button
+              onClick={() => handleComplete(true)}
+              disabled={isCompletionDisabled}
+              variant="outline"
+              className="h-12 w-full text-base"
+            >
+              <RotateCcw className="mr-2 h-5 w-5" />
+              Complete and Restart
+            </Button>
+          </div>
         </div>
       </div>
 
