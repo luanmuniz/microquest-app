@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Info, Plus, Scroll, Search } from 'lucide-react';
+import { Info, Plus, Scroll, Search, Sparkles } from 'lucide-react';
 import { useTutorial } from '@/tutorial/TutorialProvider';
 import { toast } from 'sonner';
 
@@ -92,6 +92,109 @@ const matchesQuestQuery = (quest: Quest, normalizedQuery: string) => {
   return queryTokens.every((token) => matchesQueryToken(token, searchCandidates));
 };
 
+interface StarterTemplate {
+  title: string;
+  description: string;
+}
+
+interface StarterTemplateGroup {
+  area: 'Fitness' | 'Study' | 'Mindfulness' | 'Work' | 'Health';
+  templates: StarterTemplate[];
+}
+
+const EMPTY_QUEST_DRAFT: StarterTemplate = {
+  title: '',
+  description: '',
+};
+
+const STARTER_TEMPLATES_BY_AREA: StarterTemplateGroup[] = [
+  {
+    area: 'Fitness',
+    templates: [
+      {
+        title: 'Take a 10-minute walk',
+        description: 'Step outside and walk at an easy pace for 10 minutes.',
+      },
+      {
+        title: 'Do a 5-minute mobility stretch',
+        description: 'Loosen up your hips, shoulders, and back with light stretches.',
+      },
+      {
+        title: 'Complete a quick bodyweight set',
+        description: 'Do one short round of squats, push-ups, and planks.',
+      },
+    ],
+  },
+  {
+    area: 'Study',
+    templates: [
+      {
+        title: 'Read 15 pages',
+        description: 'Read 15 pages from your current book or course material.',
+      },
+      {
+        title: 'Run one 25-minute focus sprint',
+        description: 'Study with full focus for one Pomodoro block.',
+      },
+      {
+        title: 'Review yesterday’s notes for 10 minutes',
+        description: 'Reinforce what you learned by revisiting key points.',
+      },
+    ],
+  },
+  {
+    area: 'Mindfulness',
+    templates: [
+      {
+        title: 'Take a 3-minute breathing pause',
+        description: 'Stop, breathe slowly, and reset your attention.',
+      },
+      {
+        title: 'Write one gratitude note',
+        description: 'Capture one thing you are grateful for today.',
+      },
+      {
+        title: 'Do a 10-minute no-phone reset',
+        description: 'Put your phone away and be present for 10 minutes.',
+      },
+    ],
+  },
+  {
+    area: 'Work',
+    templates: [
+      {
+        title: 'Plan your top 3 priorities',
+        description: 'Pick the three most important tasks for today.',
+      },
+      {
+        title: 'Finish one high-impact task first',
+        description: 'Complete the task that moves your work forward the most.',
+      },
+      {
+        title: 'Do a 15-minute inbox triage',
+        description: 'Clear urgent messages and defer the rest.',
+      },
+    ],
+  },
+  {
+    area: 'Health',
+    templates: [
+      {
+        title: 'Drink a full glass of water',
+        description: 'Hydrate mindfully with one full glass of water.',
+      },
+      {
+        title: 'Prepare one balanced meal',
+        description: 'Build a simple meal with protein, fiber, and healthy carbs.',
+      },
+      {
+        title: 'Start wind-down 30 minutes before sleep',
+        description: 'Begin a calming routine 30 minutes before bedtime.',
+      },
+    ],
+  },
+];
+
 export default function QuestsPage() {
   const {
     quests,
@@ -104,6 +207,9 @@ export default function QuestsPage() {
   } = useQuests();
   const { currentStepId, tutorialQuestId } = useTutorial();
   const [showForm, setShowForm] = useState(false);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [questDraft, setQuestDraft] = useState<StarterTemplate>(EMPTY_QUEST_DRAFT);
+  const [questDraftKey, setQuestDraftKey] = useState(0);
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [deletingQuestId, setDeletingQuestId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,9 +245,30 @@ export default function QuestsPage() {
   const handleCreate = (title: string, description: string) => {
     addQuest(title, description);
     setShowForm(false);
+    setQuestDraft(EMPTY_QUEST_DRAFT);
     toast.success('Quest created', {
       description: `"${title}" has been added to your quest list.`
     });
+  };
+
+  const openCreateQuestDialog = () => {
+    setQuestDraft(EMPTY_QUEST_DRAFT);
+    setQuestDraftKey((currentKey) => currentKey + 1);
+    setShowForm(true);
+  };
+
+  const openStarterTemplatesDialog = () => {
+    setShowTemplateDialog(true);
+  };
+
+  const handleTemplateSelection = (template: StarterTemplate) => {
+    setQuestDraft({
+      title: template.title,
+      description: template.description,
+    });
+    setQuestDraftKey((currentKey) => currentKey + 1);
+    setShowTemplateDialog(false);
+    setShowForm(true);
   };
 
   const handleUpdate = (title: string, description: string) => {
@@ -201,14 +328,24 @@ export default function QuestsPage() {
         </div>
         
         {quests.length > 0 && (
-          <Button
-            onClick={() => setShowForm(true)}
-            className="btn-quest w-full lg:w-auto"
-            data-tutorial-id={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Quest
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+            <Button
+              variant="outline"
+              onClick={openStarterTemplatesDialog}
+              className="w-full lg:w-auto"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Starter Templates
+            </Button>
+            <Button
+              onClick={openCreateQuestDialog}
+              className="btn-quest w-full lg:w-auto"
+              data-tutorial-id={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              New Quest
+            </Button>
+          </div>
         )}
       </div>
 
@@ -219,8 +356,10 @@ export default function QuestsPage() {
           title="No quests yet"
           description="Create your first quest to start your journey. Small daily challenges lead to big changes."
           actionLabel="Create Your First Quest"
-          onAction={() => setShowForm(true)}
+          onAction={openCreateQuestDialog}
           actionDataTutorialId={currentStepId === 'create-quest' ? 'create-quest-button' : undefined}
+          secondaryActionLabel="Starter Templates"
+          onSecondaryAction={openStarterTemplatesDialog}
         />
       ) : (
         <>
@@ -280,6 +419,41 @@ export default function QuestsPage() {
       )}
 
       {/* Create Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="max-w-2xl gap-5">
+          <div className="mx-auto h-1.5 w-12 rounded-full bg-border/80 lg:hidden" />
+          <DialogHeader className="pr-8">
+            <DialogTitle>Starter Templates</DialogTitle>
+            <DialogDescription>
+              Pick a starter quest by area. We will prefill the create form so you can customize it.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+            {STARTER_TEMPLATES_BY_AREA.map((group) => (
+              <section key={group.area} className="space-y-2">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.area}
+                </h3>
+                <div className="space-y-2">
+                  {group.templates.map((template) => (
+                    <button
+                      key={template.title}
+                      type="button"
+                      onClick={() => handleTemplateSelection(template)}
+                      className="w-full rounded-xl border border-border/70 bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <p className="font-medium text-foreground">{template.title}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent
           className="gap-5"
@@ -295,6 +469,9 @@ export default function QuestsPage() {
             </DialogDescription>
           </DialogHeader>
           <QuestForm 
+            key={questDraftKey}
+            initialTitle={questDraft.title}
+            initialDescription={questDraft.description}
             onSubmit={handleCreate} 
             onCancel={() => setShowForm(false)} 
           />

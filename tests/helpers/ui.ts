@@ -16,6 +16,18 @@ export async function openCreateQuestDialog(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Create New Quest' })).toBeVisible();
 }
 
+export async function openStarterTemplatesDialog(page: Page): Promise<void> {
+  const starterTemplatesButton = page.getByRole('button', { name: 'Starter Templates' });
+  await expect(starterTemplatesButton.first()).toBeVisible();
+  await starterTemplatesButton.first().click();
+  await expect(page.getByRole('heading', { name: 'Starter Templates' })).toBeVisible();
+}
+
+export async function selectStarterTemplate(page: Page, templateTitle: string): Promise<void> {
+  await page.getByRole('button', { name: new RegExp(`^${escapeRegExp(templateTitle)}`) }).click();
+  await expect(page.getByRole('heading', { name: 'Create New Quest' })).toBeVisible();
+}
+
 export async function createQuestViaDialog(
   page: Page,
   title: string,
@@ -78,4 +90,8 @@ export async function openDataActionDialog(
 
   await expect(menuItem).toBeVisible();
   await menuItem.click();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

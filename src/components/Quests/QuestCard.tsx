@@ -68,7 +68,6 @@ export function QuestCard({
               aria-label={favoriteActionLabel}
             >
               <Star className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
-              <span className="hidden lg:inline">{isFavorite ? 'Favorited' : 'Favorite'}</span>
             </Button>
           )}
           {!isToday && onSetToday && (
