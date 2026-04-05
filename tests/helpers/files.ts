@@ -2,16 +2,24 @@ import { promises as fs } from 'node:fs';
 import { type Download } from '@playwright/test';
 import type { QuestDataSnapshot } from './state';
 
-export function createImportFile(name: string, content: string) {
+export function createImportFile(
+  name: string,
+  content: string,
+  mimeType = 'application/json',
+) {
   return {
     name,
-    mimeType: 'application/json',
+    mimeType,
     buffer: Buffer.from(content, 'utf8'),
   };
 }
 
 export function createSnapshotImportFile(name: string, snapshot: QuestDataSnapshot) {
   return createImportFile(name, JSON.stringify(snapshot, null, 2));
+}
+
+export function createCsvImportFile(name: string, csvContent: string) {
+  return createImportFile(name, csvContent, 'text/csv');
 }
 
 export async function readDownloadText(download: Download): Promise<string> {

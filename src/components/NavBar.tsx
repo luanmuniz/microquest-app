@@ -37,7 +37,7 @@ import {
 import { ImportDataDialog } from '@/components/ImportDataDialog';
 import { useQuests } from '@/context';
 import { useIsMobile } from '@/hooks/useMobile';
-import { stringifyQuestDataExport } from '@/lib/dataTransfer';
+import { stringifyQuestDataCsvExport, stringifyQuestDataExport } from '@/lib/dataTransfer';
 import { clearOnboardingState } from '@/lib/onboarding';
 import { toast } from 'sonner';
 
@@ -95,28 +95,60 @@ export function Navbar() {
     };
   }, [isMobile, isUserMenuOpen]);
 
-  const handleExportData = () => {
+  const triggerDownload = (content: string, mimeType: string, fileName: string) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportCsvData = () => {
     if (!hasExportableData) {
       return;
     }
 
     try {
+      const date = new Date().toISOString().split('T')[0];
+      const csv = stringifyQuestDataCsvExport({
+        quests,
+        todayQuestId,
+        completions,
+      });
+
+      triggerDownload(csv, 'text/csv;charset=utf-8', `microquest-data-${date}.csv`);
+      setIsExportDialogOpen(false);
+      setIsUserMenuOpen(false);
+
+      toast.success('Data exported', {
+        description: 'Your Microquest data was downloaded as a CSV file.',
+      });
+    } catch {
+      toast.error('Export failed', {
+        description: 'We could not generate your export file. Please try again.',
+      });
+    }
+  };
+
+  const handleExportJsonData = () => {
+    if (!hasExportableData) {
+      return;
+    }
+
+    try {
+      const date = new Date().toISOString().split('T')[0];
       const json = stringifyQuestDataExport({
         quests,
         todayQuestId,
         completions,
       });
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const date = new Date().toISOString().split('T')[0];
 
-      link.href = url;
-      link.download = `microquest-data-${date}.json`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      triggerDownload(json, 'application/json', `microquest-data-${date}.json`);
       setIsExportDialogOpen(false);
       setIsUserMenuOpen(false);
 
@@ -372,31 +404,42 @@ export function Navbar() {
       )}
 
       <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>
               {hasExportableData ? 'Export your data?' : 'No data to export yet'}
             </DialogTitle>
             <DialogDescription>
               {hasExportableData
-                ? 'Export downloads a JSON backup of your current Microquest data to this device. It includes your quests, today&apos;s selected quest, and completion history.'
-                : 'There is no data to export yet. Once Microquest has quests, today&apos;s selected quest, or completion history, you can download them as a JSON backup from here.'}
+                ? 'Export your data as a human-readable CSV file or as a JSON backup. Both files include your quests, today's selected quest, and completion history.'
+                : 'There is no data to export yet. Once Microquest has quests, today's selected quest, or completion history, you can download them as CSV or JSON from here.'}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2 lg:flex-col lg:gap-2 lg:space-x-0">
             <Button
               type="button"
               variant="outline"
+              className="w-full whitespace-normal"
               onClick={() => setIsExportDialogOpen(false)}
             >
               {hasExportableData ? 'Cancel' : 'Close'}
             </Button>
             <Button
               type="button"
-              onClick={handleExportData}
+              variant="outline"
+              className="w-full whitespace-normal"
+              onClick={handleExportJsonData}
               disabled={!hasExportableData}
             >
-              Export data
+              Export JSON backup
+            </Button>
+            <Button
+              type="button"
+              className="btn-quest w-full whitespace-normal"
+              onClick={handleExportCsvData}
+              disabled={!hasExportableData}
+            >
+              Export in human format (CSV)
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -416,7 +459,7 @@ export function Navbar() {
           <AlertDialogHeader className="pr-8">
             <AlertDialogTitle>Clean all app data?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove your quests, today&apos;s selection,
+              This will permanently remove your quests, today's selection,
               completion history, and onboarding progress from this device.
             </AlertDialogDescription>
           </AlertDialogHeader>

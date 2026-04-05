@@ -17,7 +17,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useQuests } from '@/context';
-import { parseQuestDataImport, type QuestDataSnapshot } from '@/lib/dataTransfer';
+import {
+  parseQuestDataCsvImport,
+  parseQuestDataImport,
+  type QuestDataSnapshot,
+} from '@/lib/dataTransfer';
 import { cn } from '@/utils';
 import { toast } from 'sonner';
 
@@ -25,6 +29,49 @@ interface ImportDataDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+type QuestDataParser = (fileText: string) => QuestDataSnapshot;
+
+const getFileExtension = (fileName: string): string => {
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex === -1 || lastDotIndex === fileName.length - 1) {
+    return '';
+  }
+
+  return fileName.slice(lastDotIndex + 1).toLowerCase();
+};
+
+const getParserOrder = (fileName: string): QuestDataParser[] => {
+  const extension = getFileExtension(fileName);
+
+  if (extension === 'csv') {
+    return [parseQuestDataCsvImport, parseQuestDataImport];
+  }
+
+  if (extension === 'json') {
+    return [parseQuestDataImport, parseQuestDataCsvImport];
+  }
+
+  return [parseQuestDataImport, parseQuestDataCsvImport];
+};
+
+const parseImportFile = (fileName: string, fileText: string): QuestDataSnapshot => {
+  const parsers = getParserOrder(fileName);
+  let firstError: Error | null = null;
+
+  for (const parser of parsers) {
+    try {
+      return parser(fileText);
+    } catch (error) {
+      if (!firstError) {
+        firstError =
+          error instanceof Error ? error : new Error('We could not validate that backup file.');
+      }
+    }
+  }
+
+  throw firstError ?? new Error('We could not validate that backup file.');
+};
 
 export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) {
   const { replaceAllData } = useQuests();
@@ -68,8 +115,8 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
     setIsValidating(true);
 
     try {
-      const jsonText = await file.text();
-      const snapshot = parseQuestDataImport(jsonText);
+      const fileText = await file.text();
+      const snapshot = parseImportFile(file.name, fileText);
 
       if (validationRequestRef.current !== requestId) {
         return;
@@ -143,8 +190,9 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
         <DialogHeader className="pr-8">
           <DialogTitle>Import Microquest data</DialogTitle>
           <DialogDescription>
-            Upload a JSON backup exported from this app. Importing replaces your current
-            quests, today&apos;s quest, and completion history on this device.
+            Upload a CSV export in human format or a JSON backup exported from this app.
+            Importing replaces your current quests, today's quest, and completion history
+            on this device.
           </DialogDescription>
         </DialogHeader>
 
@@ -152,7 +200,7 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
           ref={fileInputRef}
           id={inputId}
           type="file"
-          accept=".json,application/json"
+          accept=".json,.csv,application/json,text/csv"
           className="sr-only"
           onChange={handleInputChange}
         />
@@ -196,13 +244,13 @@ export function ImportDataDialog({ open, onOpenChange }: ImportDataDialogProps) 
             <Upload className="h-6 w-6" />
           </div>
           <div className="mt-4 space-y-1">
-            <p className="text-base font-semibold text-foreground">Drop your JSON file here</p>
+            <p className="text-base font-semibold text-foreground">Drop your backup file here</p>
             <p className="text-sm text-muted-foreground">
-              Click to browse, or drag and drop a backup exported by Microquest.
+              Click to browse, or drag and drop a CSV or JSON backup exported by Microquest.
             </p>
           </div>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            .json files only
+            .json or .csv files
           </p>
         </div>
 

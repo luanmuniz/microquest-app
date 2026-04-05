@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { createSnapshot, gotoHash, seedState } from '../helpers/state';
 import { createBaseQuest } from '../helpers/fixtures';
-import { createImportFile } from '../helpers/files';
+import { createCsvImportFile, createImportFile } from '../helpers/files';
 import { openDataActionDialog } from '../helpers/ui';
 
 test('QA-21 Import Invalid Files', async ({ page }, testInfo) => {
@@ -58,6 +58,27 @@ test('QA-21 Import Invalid Files', async ({ page }, testInfo) => {
         ),
       ),
       expected: 'This backup contains an invalid quest entry.',
+    },
+    {
+      file: createCsvImportFile(
+        'invalid-structure.csv',
+        [
+          'entry_type,title,description,created_at,completed_at,reflection,is_today',
+          'quest,Quest A,Description A,2026-03-24T10:00:00.000Z,,,false,false',
+        ].join('\n'),
+      ),
+      expected: 'This file is not a valid Microquest CSV backup.',
+    },
+    {
+      file: createCsvImportFile(
+        'conflicting-today.csv',
+        [
+          'entry_type,title,description,created_at,completed_at,reflection,is_today,is_favorite',
+          'quest,Quest A,Description A,2026-03-24T10:00:00.000Z,,,true,false',
+          'quest,Quest B,Description B,2026-03-24T10:05:00.000Z,,,true,false',
+        ].join('\n'),
+      ),
+      expected: 'This CSV backup contains conflicting today quest rows.',
     },
   ] as const;
 

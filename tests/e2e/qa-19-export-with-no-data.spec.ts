@@ -12,5 +12,6 @@ test('QA-19 Export With No Data', async ({ page }, testInfo) => {
   await gotoHash(page, '/quests');
   await openDataActionDialog(page, testInfo.project.name, 'Export data');
   await expect(page.getByRole('heading', { name: 'No data to export yet' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Export data' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Export in human format (CSV)' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Export JSON backup' })).toBeDisabled();
 });
