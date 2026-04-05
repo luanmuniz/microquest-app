@@ -411,8 +411,8 @@ export function Navbar() {
             </DialogTitle>
             <DialogDescription>
               {hasExportableData
-                ? 'Export your data as a human-readable CSV file or as a JSON backup. Both files include your quests, today's selected quest, and completion history.'
-                : 'There is no data to export yet. Once Microquest has quests, today's selected quest, or completion history, you can download them as CSV or JSON from here.'}
+                ? "Export your data as a human-readable CSV file or as a JSON backup. Both files include your quests, today's selected quest, and completion history."
+                : "There is no data to export yet. Once Microquest has quests, today's selected quest, or completion history, you can download them as CSV or JSON from here."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col gap-2 lg:flex-col lg:gap-2 lg:space-x-0">

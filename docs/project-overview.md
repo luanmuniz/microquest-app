@@ -254,7 +254,7 @@ The following limitations are part of the current implemented release and should
 - The app does not include sign-in, cloud sync, collaboration, or server storage.
 - Only one quest can be selected as today's quest at a time.
 - Reflection is optional during normal usage, but it becomes required during the desktop guided tutorial for the tutorial-created quest.
-- Completion history entries can be viewed but not edited or deleted.
+- Completion history entries can be expanded, have reflections edited, and be deleted.
 - The mobile experience has no guided tutorial overlay.
 - The app does not currently provide search, filtering, sorting, streaks, reminders, or analytics dashboards.
 - Export and import are manual backup tools, not automatic synchronization.

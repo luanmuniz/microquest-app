@@ -244,6 +244,29 @@ export function useQuestStore() {
     }));
   }, [getTodayQuest]);
 
+  const updateCompletionReflection = useCallback(
+    (completionId: string, reflection: string) => {
+      setState((prev) => ({
+        ...prev,
+        completions: prev.completions.map((completion) =>
+          completion.id === completionId
+            ? { ...completion, reflection }
+            : completion,
+        ),
+      }));
+    },
+    [],
+  );
+
+  const deleteCompletion = useCallback((completionId: string) => {
+    setState((prev) => ({
+      ...prev,
+      completions: prev.completions.filter(
+        (completion) => completion.id !== completionId,
+      ),
+    }));
+  }, []);
+
   const startFresh = useCallback(() => {
     setState(EMPTY_STATE);
   }, []);
@@ -263,6 +286,8 @@ export function useQuestStore() {
     deleteQuest,
     setTodayQuest,
     completeToday,
+    updateCompletionReflection,
+    deleteCompletion,
     startFresh,
     replaceAllData,
   };

@@ -1,17 +1,40 @@
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { format } from 'date-fns';
-import { ChevronDown, ChevronUp, MessageSquare, Calendar } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  Calendar,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import type { QuestCompletion } from '@/hooks/useQuestStore';
+import { Button } from '@/components/ui/button';
 
 interface HistoryEntryProps {
   completion: QuestCompletion;
   tutorialTarget?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function HistoryEntry({ completion, tutorialTarget = false }: HistoryEntryProps) {
+export function HistoryEntry({
+  completion,
+  tutorialTarget = false,
+  onEdit,
+  onDelete,
+}: HistoryEntryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const hasReflection = completion.reflection.trim().length > 0;
   const formattedDate = format(new Date(completion.completedAt), 'MMM d, yyyy');
   const formattedTime = format(new Date(completion.completedAt), 'h:mm a');
+  const handleActionClick = (
+    event: MouseEvent<HTMLButtonElement>,
+    callback?: () => void,
+  ) => {
+    event.stopPropagation();
+    callback?.();
+  };
 
   return (
     <div 
@@ -33,9 +56,33 @@ export function HistoryEntry({ completion, tutorialTarget = false }: HistoryEntr
           </div>
         </div>
         
-        <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
-          {completion.reflection && (
+        <div className="flex shrink-0 items-center gap-1 self-end sm:self-center">
+          {hasReflection && (
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          )}
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(event) => handleActionClick(event, onEdit)}
+              className="h-8 w-8 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+              title="Edit reflection"
+              aria-label="Edit reflection"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(event) => handleActionClick(event, onDelete)}
+              className="h-8 w-8 text-muted-foreground hover:bg-destructive/15 hover:text-destructive"
+              title="Delete entry"
+              aria-label="Delete entry"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           )}
           {isExpanded ? (
             <ChevronUp className="h-5 w-5 text-muted-foreground" />
@@ -50,7 +97,7 @@ export function HistoryEntry({ completion, tutorialTarget = false }: HistoryEntr
           <div className="text-sm">
             <span className="font-medium text-foreground">Reflection:</span>
             <p className="mt-1 text-muted-foreground">
-              {completion.reflection || 'No reflection recorded.'}
+              {hasReflection ? completion.reflection : 'No reflection recorded.'}
             </p>
           </div>
         </div>
